@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="0.001mm"
+   height="0.001mm"
+   viewBox="0 0 0.001 0.0010000001"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
+   sodipodi:docname="spiraleIcon.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="0.69266698"
+     inkscape:cx="233.87862"
+     inkscape:cy="216.55428"
+     inkscape:window-width="1472"
+     inkscape:window-height="831"
+     inkscape:window-x="0"
+     inkscape:window-y="38"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Calque 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-34.193398,-62.028271)">
+    <path
+       sodipodi:type="spiral"
+       style="fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:48.4461;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1"
+       id="path2"
+       sodipodi:cx="-386.91031"
+       sodipodi:cy="207.89211"
+       sodipodi:expansion="1.2"
+       sodipodi:revolution="2.9000001"
+       sodipodi:radius="209.25116"
+       sodipodi:argument="-19.537228"
+       sodipodi:t0="0.20999999"
+       d="m -419.07129,207.9823 c -7.07385,-22.33691 10.7572,-43.89279 32.0247,-48.68393 31.71842,-7.14554 60.82829,17.95414 66.16097,48.40857 7.27079,41.52274 -25.64971,78.69538 -65.78836,84.45107 -51.7056,7.41433 -97.32489,-33.74129 -103.43065,-83.9765 -7.5629,-62.22381 42.16441,-116.605156 102.85014,-123.011796 73.04181,-7.71108 136.45628,50.874306 143.12848,122.321946 7.85661,84.13074 -59.83784,156.81777 -142.32624,163.72898 -95.46703,7.99862 -177.64209,-69.02936 -184.77169,-162.81163 -8.13681,-107.03113 78.42843,-198.8907505 183.73673,-206.2222314 17.81497,-1.24026457 35.78154,-0.1452352 53.3204,3.2104599"
+       transform="matrix(0.07912031,0,0,0.0716755,82.790412,96.296713)" />
+  </g>
+</svg>

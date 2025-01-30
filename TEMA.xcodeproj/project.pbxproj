@@ -6,6 +6,13 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		F339166C2D4AFD3E000F8B68 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = F339166B2D4AFD3E000F8B68 /* FirebaseAnalytics */; };
+		F339166E2D4AFD3E000F8B68 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = F339166D2D4AFD3E000F8B68 /* FirebaseAuth */; };
+		F33916702D4AFD3E000F8B68 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = F339166F2D4AFD3E000F8B68 /* FirebaseFirestore */; };
+		F33916722D4AFD3E000F8B68 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = F33916712D4AFD3E000F8B68 /* FirebaseStorage */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		F32691B42D46E8150061DC55 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +59,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F339166C2D4AFD3E000F8B68 /* FirebaseAnalytics in Frameworks */,
+				F33916722D4AFD3E000F8B68 /* FirebaseStorage in Frameworks */,
+				F339166E2D4AFD3E000F8B68 /* FirebaseAuth in Frameworks */,
+				F33916702D4AFD3E000F8B68 /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +123,10 @@
 			);
 			name = TEMA;
 			packageProductDependencies = (
+				F339166B2D4AFD3E000F8B68 /* FirebaseAnalytics */,
+				F339166D2D4AFD3E000F8B68 /* FirebaseAuth */,
+				F339166F2D4AFD3E000F8B68 /* FirebaseFirestore */,
+				F33916712D4AFD3E000F8B68 /* FirebaseStorage */,
 			);
 			productName = TEMA;
 			productReference = F32691A32D46E8140061DC55 /* TEMA.app */;
@@ -195,6 +210,9 @@
 			);
 			mainGroup = F326919A2D46E8140061DC55;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				F339166A2D4AFD3E000F8B68 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = F32691A42D46E8140061DC55 /* Products */;
 			projectDirPath = "";
@@ -393,6 +411,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = TEMA/TEMA.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"TEMA/Preview Content\"";
@@ -404,6 +423,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -422,6 +442,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = TEMA/TEMA.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"TEMA/Preview Content\"";
@@ -433,6 +454,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -558,6 +580,40 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		F339166A2D4AFD3E000F8B68 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.7.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		F339166B2D4AFD3E000F8B68 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F339166A2D4AFD3E000F8B68 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		F339166D2D4AFD3E000F8B68 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F339166A2D4AFD3E000F8B68 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		F339166F2D4AFD3E000F8B68 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F339166A2D4AFD3E000F8B68 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		F33916712D4AFD3E000F8B68 /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F339166A2D4AFD3E000F8B68 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = F326919B2D46E8140061DC55 /* Project object */;
 }
