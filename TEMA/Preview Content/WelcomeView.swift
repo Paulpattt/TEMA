@@ -36,6 +36,10 @@ struct WelcomeView: View {
                     case .success(let authResults):
                         handleSignIn(authResults)
                     case .failure(let error):
+                        if let authError = error as? ASAuthorizationError, authError.code == .canceled {
+                            // L'utilisateur a annulé → Ne rien afficher
+                            return
+                        }
                         errorMessage = "Erreur : \(error.localizedDescription)"
                     }
                 })

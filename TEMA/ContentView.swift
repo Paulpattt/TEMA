@@ -38,7 +38,7 @@ struct MainAppView: View {
                         Text("TEMA")
                             .font(.largeTitle)
                             .bold()
-                            .foregroundColor(.red)
+                            .foregroundColor(Color("TEMA_Red"))
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     Spacer()
@@ -69,7 +69,7 @@ struct MainAppView: View {
                     .tabItem { Image("homeIcon") }
                     .tag(0)
 
-                SpiralView()
+                SpiraleView()
                     .tabItem { Image("spiraleIcon") }
                     .tag(1)
 
@@ -85,7 +85,7 @@ struct MainAppView: View {
                     .tabItem { Image("profileIcon") }
                     .tag(4)
             }
-            .accentColor(.red)
+            .accentColor(Color("TEMA_Red"))
         }
     }
 }
