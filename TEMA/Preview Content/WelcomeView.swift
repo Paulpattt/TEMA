@@ -1,171 +1,169 @@
 import SwiftUI
-import AuthenticationServices
 
 struct WelcomeView: View {
     @EnvironmentObject var appData: AppData
     @State private var isSigningUp = false
     @State private var isLoggingIn = false
-    @State private var phoneNumber: String = ""
+    
+    // Pour l'authentification par e-mail
+    @State private var email: String = ""
     @State private var password: String = ""
     @State private var confirmPassword: String = ""
+    @State private var fullName: String = ""
+    
     @State private var errorMessage: String?
 
     var body: some View {
         VStack(spacing: 20) {
-            // ✅ HEADER AVEC "TEMA" MAIS SANS BARRE DE RECHERCHE
+            // En-tête de l'app
             HStack {
                 Text("TEMA")
                     .font(.largeTitle)
                     .bold()
                     .foregroundColor(.red)
                     .frame(maxWidth: .infinity, alignment: .leading)
-
                 Spacer()
             }
             .padding(.horizontal)
             .frame(height: 50)
-
+            
             Spacer()
-
-            // ✅ OPTION 1 : Connexion avec Apple
+            
+            // Si aucune action n'est en cours, proposer les boutons "Se connecter" et "Créer un compte"
             if !isSigningUp && !isLoggingIn {
-                SignInWithAppleButton(.signIn, onRequest: { request in
-                    request.requestedScopes = [.fullName, .email]
-                }, onCompletion: { result in
-                    switch result {
-                    case .success(let authResults):
-                        handleSignIn(authResults)
-                    case .failure(let error):
-                        if let authError = error as? ASAuthorizationError, authError.code == .canceled {
-                            // L'utilisateur a annulé → Ne rien afficher
-                            return
-                        }
-                        errorMessage = "Erreur : \(error.localizedDescription)"
-                    }
-                })
-                .signInWithAppleButtonStyle(.black)
-                .frame(height: 50)
-                .cornerRadius(10)
+                Button(action: {
+                    isLoggingIn = true
+                    clearFields()
+                }) {
+                    Text("Se connecter")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
+                .padding(.horizontal)
+                
+                Button(action: {
+                    isSigningUp = true
+                    clearFields()
+                }) {
+                    Text("Créer un compte")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.green)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
                 .padding(.horizontal)
             }
-
-            // ✅ OPTION 2 : Connexion par téléphone (Affiché si Login activé)
+            
+            // Formulaire de connexion
             if isLoggingIn {
                 VStack(spacing: 15) {
-                    TextField("Numéro de téléphone", text: $phoneNumber)
-                        .keyboardType(.phonePad)
-                        .padding()
-                        .background(Color(.systemGray6))
-                        .cornerRadius(8)
-
+                    TextField("Email", text: $email)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .keyboardType(.emailAddress)
+                        .autocapitalization(.none)
+                    
                     SecureField("Mot de passe", text: $password)
-                        .padding()
-                        .background(Color(.systemGray6))
-                        .cornerRadius(8)
-
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                    
                     Button(action: login) {
                         Text("Se connecter")
-                            .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .padding()
                             .background(Color.blue)
-                            .cornerRadius(8)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
                     }
+                    
+                    Button("Annuler") {
+                        isLoggingIn = false
+                        clearFields()
+                    }
+                    .foregroundColor(.gray)
                 }
-                .padding(.horizontal, 20)
+                .padding()
             }
-
-            // ✅ OPTION 3 : Création de compte (Affiché si Signup activé)
+            
+            // Formulaire d'inscription
             if isSigningUp {
                 VStack(spacing: 15) {
-                    TextField("Numéro de téléphone", text: $phoneNumber)
-                        .keyboardType(.phonePad)
-                        .padding()
-                        .background(Color(.systemGray6))
-                        .cornerRadius(8)
-
+                    TextField("Nom complet", text: $fullName)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                    
+                    TextField("Email", text: $email)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .keyboardType(.emailAddress)
+                        .autocapitalization(.none)
+                    
                     SecureField("Mot de passe", text: $password)
-                        .padding()
-                        .background(Color(.systemGray6))
-                        .cornerRadius(8)
-
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                    
                     SecureField("Confirmer le mot de passe", text: $confirmPassword)
-                        .padding()
-                        .background(Color(.systemGray6))
-                        .cornerRadius(8)
-
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                    
                     Button(action: register) {
                         Text("Créer un compte")
-                            .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .padding()
                             .background(Color.green)
-                            .cornerRadius(8)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
                     }
+                    
+                    Button("Annuler") {
+                        isSigningUp = false
+                        clearFields()
+                    }
+                    .foregroundColor(.gray)
                 }
-                .padding(.horizontal, 20)
+                .padding()
             }
-
-            // ✅ Affichage des erreurs
+            
+            // Affichage d'un message d'erreur s'il y a lieu
             if let errorMessage = errorMessage {
                 Text(errorMessage)
                     .foregroundColor(.red)
                     .padding()
             }
-
+            
             Spacer()
-
-            // ✅ BOUTONS DE NAVIGATION ENTRE LES MODES
-            if !isSigningUp && !isLoggingIn {
-                Button(action: { isLoggingIn = true }) {
-                    Text("Se connecter avec un numéro de téléphone")
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .cornerRadius(8)
-                }
-                .padding(.horizontal, 20)
-
-                Button(action: { isSigningUp = true }) {
-                    Text("Créer un compte")
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.green)
-                        .cornerRadius(8)
-                }
-                .padding(.horizontal, 20)
-            } else {
-                Button(action: { isSigningUp = false; isLoggingIn = false }) {
-                    Text("Retour")
-                        .foregroundColor(.blue)
-                        .padding()
-                }
-            }
         }
         .padding()
     }
-
-    // ✅ FONCTION CONNEXION
+    
+    // Efface les champs de saisie
+    func clearFields() {
+        email = ""
+        password = ""
+        confirmPassword = ""
+        fullName = ""
+        errorMessage = nil
+    }
+    
+    // Connexion via Firebase
     func login() {
-        let savedPhone = UserDefaults.standard.string(forKey: "userPhoneNumber")
-        let savedPassword = UserDefaults.standard.string(forKey: "userPassword")
-
-        guard phoneNumber == savedPhone, password == savedPassword else {
-            errorMessage = "Numéro ou mot de passe incorrect"
+        guard !email.isEmpty, !password.isEmpty else {
+            errorMessage = "Veuillez remplir tous les champs"
             return
         }
-
-        UserDefaults.standard.set(true, forKey: "isLoggedIn")
-        errorMessage = nil
-        print("✅ Connexion réussie : \(phoneNumber)")
-        appData.isLoggedIn = true
+        
+        appData.signInWithEmail(email: email, password: password) { error in
+            if let error = error {
+                errorMessage = error.localizedDescription
+            } else {
+                errorMessage = nil
+                // La connexion est gérée par le listener Firebase dans AppData,
+                // et ContentView bascule automatiquement vers MainAppView.
+            }
+        }
     }
-
-    // ✅ FONCTION INSCRIPTION
+    
+    // Inscription via Firebase
     func register() {
-        guard !phoneNumber.isEmpty, !password.isEmpty else {
+        guard !fullName.isEmpty, !email.isEmpty, !password.isEmpty, !confirmPassword.isEmpty else {
             errorMessage = "Veuillez remplir tous les champs"
             return
         }
@@ -174,29 +172,15 @@ struct WelcomeView: View {
             errorMessage = "Les mots de passe ne correspondent pas"
             return
         }
-
-        UserDefaults.standard.set(phoneNumber, forKey: "userPhoneNumber")
-        UserDefaults.standard.set(password, forKey: "userPassword")
-        UserDefaults.standard.set(true, forKey: "isLoggedIn")
-
-        errorMessage = nil
-        print("✅ Utilisateur enregistré avec succès : \(phoneNumber)")
-        appData.isLoggedIn = true
-    }
-
-    // ✅ FONCTION APPLE SIGN-IN
-    func handleSignIn(_ authResults: ASAuthorization) {
-        guard let appleIDCredential = authResults.credential as? ASAuthorizationAppleIDCredential else { return }
-
-        let userIdentifier = appleIDCredential.user
-        let fullName = appleIDCredential.fullName
-        let username = "\(fullName?.givenName ?? "Utilisateur") \(fullName?.familyName ?? "")".trimmingCharacters(in: .whitespaces)
-
-        UserDefaults.standard.set(userIdentifier, forKey: "AppleUserID")
-
-        DispatchQueue.main.async {
-            appData.updateUser(from: username)
-            appData.isLoggedIn = true
+        
+        appData.signUpWithEmail(email: email, password: password, fullName: fullName) { error in
+            if let error = error {
+                errorMessage = error.localizedDescription
+            } else {
+                errorMessage = nil
+                // Une fois inscrit, le listener Firebase mettra automatiquement à jour l'état de connexion,
+                // et ContentView affichera MainAppView.
+            }
         }
     }
 }

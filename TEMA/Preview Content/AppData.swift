@@ -1,78 +1,95 @@
 import SwiftUI
+import FirebaseAuth
 
-// ✅ Modèle pour une publication (Post)
-struct Post: Identifiable, Codable {
-    var id: String
-    var authorId: String
-    var imageName: String
-    var date: Date
-}
-
-// ✅ Modèle pour un utilisateur
-struct User: Codable {
+// Modèle utilisateur simplifié
+struct User: Identifiable, Codable {
     var id: String
     var name: String
     var email: String?
-    var phoneNumber: String?
-    var profilePicture: String?
+    // Vous pourrez ajouter d'autres propriétés, par exemple une URL de photo de profil.
 }
 
 class AppData: ObservableObject {
     @Published var isLoggedIn: Bool = false
     @Published var currentUser: User?
-    @Published var posts: [Post] = [] // ✅ Ajout des posts de l'utilisateur
-
+    
+    // Listener pour suivre l'état de l'authentification Firebase.
+    private var authStateListenerHandle: AuthStateDidChangeListenerHandle?
+    
     init() {
-        loadUser()
-        loadPosts() // ✅ Charger les posts au démarrage
-    }
-
-    // ✅ Enregistre l'utilisateur dans UserDefaults
-    func saveUser(_ user: User) {
-        if let encoded = try? JSONEncoder().encode(user) {
-            UserDefaults.standard.set(encoded, forKey: "currentUser")
-        }
-        self.currentUser = user
-        self.isLoggedIn = true
-        UserDefaults.standard.set(true, forKey: "isLoggedIn")
-    }
-
-    // ✅ Charge l'utilisateur enregistré
-    func loadUser() {
-        if let savedUserData = UserDefaults.standard.data(forKey: "currentUser"),
-           let savedUser = try? JSONDecoder().decode(User.self, from: savedUserData) {
-            self.currentUser = savedUser
-            self.isLoggedIn = true
-        } else {
-            self.isLoggedIn = false
+        // On écoute les changements d'état de Firebase Auth.
+        authStateListenerHandle = Auth.auth().addStateDidChangeListener { [weak self] auth, firebaseUser in
+            DispatchQueue.main.async {
+                if let firebaseUser = firebaseUser {
+                    // Utilisateur connecté
+                    self?.isLoggedIn = true
+                    let displayName = firebaseUser.displayName ?? "Utilisateur"
+                    self?.currentUser = User(id: firebaseUser.uid, name: displayName, email: firebaseUser.email)
+                    print("Utilisateur connecté: \(firebaseUser.email ?? "inconnu")")
+                } else {
+                    // Aucun utilisateur connecté
+                    self?.isLoggedIn = false
+                    self?.currentUser = nil
+                    print("Aucun utilisateur connecté")
+                }
+            }
         }
     }
-
-    // ✅ Met à jour l'utilisateur actuel avec un nouveau nom
-    func updateUser(from username: String) {
-        if var user = self.currentUser {
-            user.name = username
-            saveUser(user) // ✅ Sauvegarde les données mises à jour
-        } else {
-            let newUser = User(id: UUID().uuidString, name: username, email: nil, phoneNumber: nil, profilePicture: nil)
-            saveUser(newUser)
+    
+    deinit {
+        if let handle = authStateListenerHandle {
+            Auth.auth().removeStateDidChangeListener(handle)
         }
     }
-
-    // ✅ Déconnexion
-    func logout() {
-        UserDefaults.standard.removeObject(forKey: "currentUser")
-        UserDefaults.standard.set(false, forKey: "isLoggedIn")
-        self.currentUser = nil
-        self.isLoggedIn = false
+    
+    // Connexion via e-mail et mot de passe.
+    func signInWithEmail(email: String, password: String, completion: @escaping (Error?) -> Void) {
+        Auth.auth().signIn(withEmail: email, password: password) { authResult, error in
+            if let error = error {
+                print("Erreur lors de la connexion : \(error.localizedDescription)")
+                completion(error)
+            } else {
+                print("Connexion réussie")
+                completion(nil)
+            }
+        }
     }
-
-    // ✅ Charger des publications fictives (temporaire)
-    func loadPosts() {
-        self.posts = [
-            Post(id: UUID().uuidString, authorId: "12345", imageName: "photo1", date: Date()),
-            Post(id: UUID().uuidString, authorId: "67890", imageName: "photo2", date: Date()),
-            Post(id: UUID().uuidString, authorId: "12345", imageName: "photo3", date: Date())
-        ]
+    
+    // Inscription via e-mail et mot de passe.
+    func signUpWithEmail(email: String, password: String, fullName: String, completion: @escaping (Error?) -> Void) {
+        Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
+            if let error = error {
+                print("Erreur lors de l'inscription : \(error.localizedDescription)")
+                completion(error)
+            } else if let firebaseUser = authResult?.user {
+                // Mise à jour du displayName dans Firebase.
+                let changeRequest = firebaseUser.createProfileChangeRequest()
+                changeRequest.displayName = fullName
+                changeRequest.commitChanges { error in
+                    if let error = error {
+                        print("Erreur lors de la mise à jour du profil : \(error.localizedDescription)")
+                        completion(error)
+                    } else {
+                        print("Inscription réussie et profil mis à jour")
+                        completion(nil)
+                    }
+                }
+            } else {
+                // Cas imprévu : aucune erreur et aucun utilisateur retourné.
+                completion(NSError(domain: "AppData", code: -1, userInfo: [NSLocalizedDescriptionKey: "Utilisateur non créé"]))
+            }
+        }
     }
+    
+    // Méthode pour se déconnecter.
+    func signOut() {
+        do {
+            try Auth.auth().signOut()
+            print("Déconnexion réussie")
+        } catch {
+            print("Erreur lors de la déconnexion : \(error.localizedDescription)")
+        }
+    }
+    
+    // Vous pourrez ajouter ici d'autres méthodes (par exemple, pour la connexion via Apple)
 }

@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @AppStorage("isLoggedIn") private var isLoggedIn: Bool = true
+    @EnvironmentObject var appData: AppData
 
     var body: some View {
         VStack {
@@ -13,9 +13,8 @@ struct SettingsView: View {
             Spacer()
 
             Button(action: {
-                // Déconnexion : On réinitialise la session
-                isLoggedIn = false
-                UserDefaults.standard.removeObject(forKey: "AppleUserID") // Supprime l'identifiant Apple stocké
+                // Appel de la méthode signOut d'AppData pour déconnecter via Firebase
+                appData.signOut()
             }) {
                 Text("Se déconnecter")
                     .foregroundColor(.white)
@@ -32,5 +31,5 @@ struct SettingsView: View {
 }
 
 #Preview {
-    SettingsView()
+    SettingsView().environmentObject(AppData())
 }

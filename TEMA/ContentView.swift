@@ -1,16 +1,13 @@
 import SwiftUI
 
 struct ContentView: View {
-    @AppStorage("hasSeenWelcomeScreen") private var hasSeenWelcomeScreen: Bool = false
-    @EnvironmentObject var appData: AppData  // Accès aux données utilisateur
+    @EnvironmentObject var appData: AppData
 
     var body: some View {
-        if !hasSeenWelcomeScreen {
-            WelcomeView() // Affiche la page de bienvenue au premier lancement
-        } else if !appData.isLoggedIn {
-            WelcomeView() // Redirige vers WelcomeView si l'utilisateur n'est pas connecté
+        if appData.isLoggedIn {
+            MainAppView() // Affiche l'application principale si l'utilisateur est connecté
         } else {
-            MainAppView() // Affiche l'application normale si l'utilisateur est connecté
+            WelcomeView() // Affiche l'écran de connexion sinon
         }
     }
 }
@@ -91,6 +88,5 @@ struct MainAppView: View {
 }
 
 #Preview {
-    ContentView()
-        .environmentObject(AppData()) // Ajoute AppData pour éviter les erreurs d’environnement
+    ContentView().environmentObject(AppData())
 }

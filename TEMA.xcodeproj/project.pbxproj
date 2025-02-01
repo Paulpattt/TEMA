@@ -36,9 +36,22 @@
 		F32691BD2D46E8150061DC55 /* TEMAUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TEMAUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		F3B8F7662D4E90F10091473F /* Exceptions for "TEMA" folder in "TEMA" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"GoogleService-Info.plist",
+			);
+			target = F32691A22D46E8140061DC55 /* TEMA */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		F32691A52D46E8140061DC55 /* TEMA */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				F3B8F7662D4E90F10091473F /* Exceptions for "TEMA" folder in "TEMA" target */,
+			);
 			path = TEMA;
 			sourceTree = "<group>";
 		};
