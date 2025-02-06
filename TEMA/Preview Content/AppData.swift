@@ -6,28 +6,36 @@ struct User: Identifiable, Codable {
     var id: String
     var name: String
     var email: String?
-    // Vous pourrez ajouter d'autres propriétés, par exemple une URL de photo de profil.
+    // Tu pourras ajouter d'autres propriétés (photo de profil, etc.)
+}
+
+// Modèle Post : ici, on stocke l'image en mémoire pour simplifier
+struct Post: Identifiable {
+    var id = UUID().uuidString
+    var authorId: String
+    var image: UIImage
+    var timestamp: Date = Date()
 }
 
 class AppData: ObservableObject {
     @Published var isLoggedIn: Bool = false
     @Published var currentUser: User?
     
-    // Listener pour suivre l'état de l'authentification Firebase.
+    // Liste des posts publiés
+    @Published var posts: [Post] = []
+    
+    // Listener Firebase pour suivre l'état de connexion
     private var authStateListenerHandle: AuthStateDidChangeListenerHandle?
     
     init() {
-        // On écoute les changements d'état de Firebase Auth.
         authStateListenerHandle = Auth.auth().addStateDidChangeListener { [weak self] auth, firebaseUser in
             DispatchQueue.main.async {
                 if let firebaseUser = firebaseUser {
-                    // Utilisateur connecté
                     self?.isLoggedIn = true
                     let displayName = firebaseUser.displayName ?? "Utilisateur"
                     self?.currentUser = User(id: firebaseUser.uid, name: displayName, email: firebaseUser.email)
-                    print("Utilisateur connecté: \(firebaseUser.email ?? "inconnu")")
+                    print("Utilisateur connecté : \(firebaseUser.email ?? "inconnu")")
                 } else {
-                    // Aucun utilisateur connecté
                     self?.isLoggedIn = false
                     self?.currentUser = nil
                     print("Aucun utilisateur connecté")
@@ -42,7 +50,7 @@ class AppData: ObservableObject {
         }
     }
     
-    // Connexion via e-mail et mot de passe.
+    // Connexion via e-mail
     func signInWithEmail(email: String, password: String, completion: @escaping (Error?) -> Void) {
         Auth.auth().signIn(withEmail: email, password: password) { authResult, error in
             if let error = error {
@@ -55,14 +63,13 @@ class AppData: ObservableObject {
         }
     }
     
-    // Inscription via e-mail et mot de passe.
+    // Inscription via e-mail
     func signUpWithEmail(email: String, password: String, fullName: String, completion: @escaping (Error?) -> Void) {
         Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
             if let error = error {
                 print("Erreur lors de l'inscription : \(error.localizedDescription)")
                 completion(error)
             } else if let firebaseUser = authResult?.user {
-                // Mise à jour du displayName dans Firebase.
                 let changeRequest = firebaseUser.createProfileChangeRequest()
                 changeRequest.displayName = fullName
                 changeRequest.commitChanges { error in
@@ -75,13 +82,12 @@ class AppData: ObservableObject {
                     }
                 }
             } else {
-                // Cas imprévu : aucune erreur et aucun utilisateur retourné.
                 completion(NSError(domain: "AppData", code: -1, userInfo: [NSLocalizedDescriptionKey: "Utilisateur non créé"]))
             }
         }
     }
     
-    // Méthode pour se déconnecter.
+    // Déconnexion
     func signOut() {
         do {
             try Auth.auth().signOut()
@@ -91,5 +97,8 @@ class AppData: ObservableObject {
         }
     }
     
-    // Vous pourrez ajouter ici d'autres méthodes (par exemple, pour la connexion via Apple)
+    // Ajoute un nouveau post
+    func addPost(_ post: Post) {
+        posts.append(post)
+    }
 }

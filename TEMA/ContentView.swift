@@ -5,7 +5,7 @@ struct ContentView: View {
 
     var body: some View {
         if appData.isLoggedIn {
-            MainAppView() // Affiche l'application principale si l'utilisateur est connecté
+            MainAppView() // Affiche l'application principale si connecté
         } else {
             WelcomeView() // Affiche l'écran de connexion sinon
         }
@@ -30,7 +30,7 @@ struct MainAppView: View {
             if !hideHeader {
                 HStack {
                     Button(action: {
-                        selectedTab = 0 // Revient à l'onglet HomeView
+                        selectedTab = 0 // Retourne à l'onglet HomeView
                     }) {
                         Text("TEMA")
                             .font(.largeTitle)

@@ -1,18 +1,21 @@
 import SwiftUI
+import AuthenticationServices
+import FirebaseAuth
+import CryptoKit
 
 struct WelcomeView: View {
     @EnvironmentObject var appData: AppData
     @State private var isSigningUp = false
     @State private var isLoggingIn = false
-    
-    // Pour l'authentification par e-mail
+
+    // Pour l'authentification par email
     @State private var email: String = ""
     @State private var password: String = ""
     @State private var confirmPassword: String = ""
     @State private var fullName: String = ""
     
     @State private var errorMessage: String?
-
+    
     var body: some View {
         VStack(spacing: 20) {
             // En-tête de l'app
@@ -29,7 +32,7 @@ struct WelcomeView: View {
             
             Spacer()
             
-            // Si aucune action n'est en cours, proposer les boutons "Se connecter" et "Créer un compte"
+            // Affichage des boutons si aucune action n'est en cours
             if !isSigningUp && !isLoggingIn {
                 Button(action: {
                     isLoggingIn = true
@@ -56,9 +59,15 @@ struct WelcomeView: View {
                         .cornerRadius(10)
                 }
                 .padding(.horizontal)
+                
+                // Bouton "Sign in with Apple"
+                SignInWithAppleButton()
+                    .frame(height: 50)
+                    .cornerRadius(10)
+                    .padding(.horizontal)
             }
             
-            // Formulaire de connexion
+            // Formulaire de connexion (par email)
             if isLoggingIn {
                 VStack(spacing: 15) {
                     TextField("Email", text: $email)
@@ -87,7 +96,7 @@ struct WelcomeView: View {
                 .padding()
             }
             
-            // Formulaire d'inscription
+            // Formulaire d'inscription (par email)
             if isSigningUp {
                 VStack(spacing: 15) {
                     TextField("Nom complet", text: $fullName)
@@ -122,7 +131,7 @@ struct WelcomeView: View {
                 .padding()
             }
             
-            // Affichage d'un message d'erreur s'il y a lieu
+            // Message d'erreur éventuel
             if let errorMessage = errorMessage {
                 Text(errorMessage)
                     .foregroundColor(.red)
@@ -134,7 +143,7 @@ struct WelcomeView: View {
         .padding()
     }
     
-    // Efface les champs de saisie
+    // Efface les champs
     func clearFields() {
         email = ""
         password = ""
@@ -143,7 +152,7 @@ struct WelcomeView: View {
         errorMessage = nil
     }
     
-    // Connexion via Firebase
+    // Connexion via Firebase (email)
     func login() {
         guard !email.isEmpty, !password.isEmpty else {
             errorMessage = "Veuillez remplir tous les champs"
@@ -155,13 +164,11 @@ struct WelcomeView: View {
                 errorMessage = error.localizedDescription
             } else {
                 errorMessage = nil
-                // La connexion est gérée par le listener Firebase dans AppData,
-                // et ContentView bascule automatiquement vers MainAppView.
             }
         }
     }
     
-    // Inscription via Firebase
+    // Inscription via Firebase (email)
     func register() {
         guard !fullName.isEmpty, !email.isEmpty, !password.isEmpty, !confirmPassword.isEmpty else {
             errorMessage = "Veuillez remplir tous les champs"
@@ -178,11 +185,134 @@ struct WelcomeView: View {
                 errorMessage = error.localizedDescription
             } else {
                 errorMessage = nil
-                // Une fois inscrit, le listener Firebase mettra automatiquement à jour l'état de connexion,
-                // et ContentView affichera MainAppView.
             }
         }
     }
+    
+    // MARK: - Bouton "Sign in with Apple" intégré dans WelcomeView
+    struct SignInWithAppleButton: UIViewRepresentable {
+        func makeUIView(context: Context) -> ASAuthorizationAppleIDButton {
+            let button = ASAuthorizationAppleIDButton()
+            button.cornerRadius = 10
+            button.addTarget(context.coordinator,
+                             action: #selector(Coordinator.didTapButton),
+                             for: .touchUpInside)
+            return button
+        }
+        
+        func updateUIView(_ uiView: ASAuthorizationAppleIDButton, context: Context) {
+            // Pas de mise à jour nécessaire
+        }
+        
+        func makeCoordinator() -> Coordinator {
+            Coordinator()
+        }
+        
+        class Coordinator: NSObject, ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
+            var currentNonce: String?
+            
+            @objc func didTapButton() {
+                // Génère un nonce et prépare la demande d'authentification
+                currentNonce = randomNonceString()
+                guard let nonce = currentNonce else { return }
+                
+                let appleIDProvider = ASAuthorizationAppleIDProvider()
+                let request = appleIDProvider.createRequest()
+                request.requestedScopes = [.fullName, .email]
+                request.nonce = sha256(nonce)
+                
+                let authController = ASAuthorizationController(authorizationRequests: [request])
+                authController.delegate = self
+                authController.presentationContextProvider = self
+                authController.performRequests()
+            }
+            
+            // Précise sur quelle fenêtre afficher le contrôle d'autorisation
+            func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
+                return UIApplication.shared.windows.first { $0.isKeyWindow } ?? UIWindow()
+            }
+            
+            // Quand l'authentification réussit
+            func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
+                if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
+                    guard let nonce = currentNonce else {
+                        fatalError("Le nonce est introuvable.")
+                    }
+                    guard let appleIDToken = appleIDCredential.identityToken,
+                          let idTokenString = String(data: appleIDToken, encoding: .utf8) else {
+                        print("Impossible de récupérer ou convertir le token d'identité.")
+                        return
+                    }
+                    
+                    // Création de la credential Firebase
+                    let credential = OAuthProvider.credential(withProviderID: "apple.com",
+                                                              idToken: idTokenString,
+                                                              rawNonce: nonce)
+                    
+                    // Authentifie avec Firebase
+                    Auth.auth().signIn(with: credential) { authResult, error in
+                        if let error = error {
+                            print("Erreur d'authentification avec Firebase : \(error.localizedDescription)")
+                            return
+                        }
+                        print("Connexion par Apple réussie !")
+                        
+                        // Récupère le nom complet (uniquement envoyé lors de la première connexion)
+                        if let fullNameComponents = appleIDCredential.fullName {
+                            let formatter = PersonNameComponentsFormatter()
+                            let fullNameString = formatter.string(from: fullNameComponents)
+                            
+                            if let currentUser = Auth.auth().currentUser {
+                                let changeRequest = currentUser.createProfileChangeRequest()
+                                changeRequest.displayName = fullNameString
+                                changeRequest.commitChanges { error in
+                                    if let error = error {
+                                        print("Erreur lors de la mise à jour du profil : \(error.localizedDescription)")
+                                    } else {
+                                        print("Profil mis à jour avec le nom : \(fullNameString)")
+                                    }
+                                }
+                            }
+                        } else {
+                            print("Aucun nom complet reçu (connexion ultérieure)")
+                        }
+                    }
+                }
+            }
+            
+            func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
+                print("Sign in with Apple a échoué : \(error.localizedDescription)")
+            }
+        }
+    }
+}
+
+// MARK: - Fonctions utilitaires pour Sign in with Apple
+
+func randomNonceString(length: Int = 32) -> String {
+    precondition(length > 0)
+    let charset: [Character] = Array("0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._")
+    var result = ""
+    var remainingLength = length
+    
+    while remainingLength > 0 {
+        var random: UInt8 = 0
+        let errorCode = SecRandomCopyBytes(kSecRandomDefault, 1, &random)
+        if errorCode != errSecSuccess {
+            fatalError("Impossible de générer un nonce : \(errorCode)")
+        }
+        if random < charset.count {
+            result.append(charset[Int(random)])
+            remainingLength -= 1
+        }
+    }
+    return result
+}
+
+func sha256(_ input: String) -> String {
+    let inputData = Data(input.utf8)
+    let hashedData = SHA256.hash(data: inputData)
+    return hashedData.compactMap { String(format: "%02x", $0) }.joined()
 }
 
 #Preview {
