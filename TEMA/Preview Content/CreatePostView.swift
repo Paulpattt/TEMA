@@ -1,5 +1,6 @@
 import SwiftUI
 import PhotosUI
+import FirebaseStorage
 
 struct CreatePostView: View {
     @EnvironmentObject var appData: AppData
@@ -58,13 +59,23 @@ struct CreatePostView: View {
     }
     
     func publishPost() {
-        guard let image = selectedImage,
-              let currentUser = appData.currentUser else { return }
-        // Création d'un nouveau post avec l'identifiant de l'utilisateur connecté
-        let newPost = Post(authorId: currentUser.id, image: image)
-        appData.addPost(newPost)
-        selectedImage = nil // Réinitialise l'image après publication
-        print("Post publié par \(currentUser.name)")
+        guard let image = selectedImage, let currentUser = appData.currentUser else {
+            print("❌ Erreur : image ou utilisateur introuvable")
+            return
+        }
+        
+        print("Début de l'upload de l'image...")
+        appData.uploadImage(image) { result in
+            switch result {
+            case .success(let imageURL):
+                let newPost = Post(authorId: currentUser.id, imageUrl: imageURL, timestamp: Date())
+                appData.addPost(newPost) // Sauvegarde dans Firestore (ou dans l'array local selon ton implémentation)
+                selectedImage = nil
+                print("✅ Post publié avec succès ! URL : \(imageURL)")
+            case .failure(let error):
+                print("❌ Erreur lors de l'upload : \(error.localizedDescription)")
+            }
+        }
     }
 }
 

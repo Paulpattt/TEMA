@@ -71,15 +71,19 @@ struct UserPostView: View {
     
     var body: some View {
         VStack {
-            Image(uiImage: post.image)
-                .resizable()
-                .scaledToFit()
-                .cornerRadius(10)
-                .shadow(radius: 5)
+            AsyncImage(url: URL(string: post.imageUrl)) { image in
+                image
+                    .resizable()
+                    .scaledToFit()
+                    .cornerRadius(10)
+                    .shadow(radius: 5)
+            } placeholder: {
+                ProgressView() // Affiche un indicateur de chargement en attendant l'image
+            }
         }
     }
-}
-
-#Preview {
-    ProfileView().environmentObject(AppData())
+    
+    #Preview {
+        ProfileView().environmentObject(AppData())
+    }
 }

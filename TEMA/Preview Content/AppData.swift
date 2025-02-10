@@ -1,5 +1,6 @@
 import SwiftUI
 import FirebaseAuth
+import FirebaseStorage
 
 // Modèle utilisateur simplifié
 struct User: Identifiable, Codable {
@@ -10,11 +11,11 @@ struct User: Identifiable, Codable {
 }
 
 // Modèle Post : ici, on stocke l'image en mémoire pour simplifier
-struct Post: Identifiable {
-    var id = UUID().uuidString
+struct Post: Identifiable, Codable {
+    var id: String = UUID().uuidString
     var authorId: String
-    var image: UIImage
-    var timestamp: Date = Date()
+    var imageUrl: String // Correction ici : on stocke une URL au lieu d’une UIImage
+    var timestamp: Date
 }
 
 class AppData: ObservableObject {
@@ -59,6 +60,33 @@ class AppData: ObservableObject {
             } else {
                 print("Connexion réussie")
                 completion(nil)
+            }
+        }
+    }
+    func uploadImage(_ image: UIImage, completion: @escaping (Result<String, Error>) -> Void) {
+        guard let imageData = image.jpegData(compressionQuality: 0.8) else {
+            completion(.failure(NSError(domain: "AppData", code: -1, userInfo: [NSLocalizedDescriptionKey: "Impossible de convertir l’image"])))
+            return
+        }
+        
+        let storageRef = Storage.storage().reference()
+        let imageRef = storageRef.child("posts/\(UUID().uuidString).jpg") // 📂 Sauvegarde sous "posts/"
+        
+        let metadata = StorageMetadata()
+        metadata.contentType = "image/jpeg"
+        
+        imageRef.putData(imageData, metadata: metadata) { metadata, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            imageRef.downloadURL { url, error in
+                if let error = error {
+                    completion(.failure(error))
+                } else if let url = url {
+                    completion(.success(url.absoluteString)) // ✅ Retourne l’URL de l’image uploadée
+                }
             }
         }
     }

@@ -41,7 +41,7 @@ struct WelcomeView: View {
                     Text("Se connecter")
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color.blue)
+                        .background(Color.red)
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }
@@ -54,7 +54,7 @@ struct WelcomeView: View {
                     Text("Créer un compte")
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color.green)
+                        .background(Color.red)
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }
@@ -82,7 +82,7 @@ struct WelcomeView: View {
                         Text("Se connecter")
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(Color.blue)
+                            .background(Color.red)
                             .foregroundColor(.white)
                             .cornerRadius(10)
                     }
@@ -117,7 +117,7 @@ struct WelcomeView: View {
                         Text("Créer un compte")
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(Color.green)
+                            .background(Color.red)
                             .foregroundColor(.white)
                             .cornerRadius(10)
                     }
