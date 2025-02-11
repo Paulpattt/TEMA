@@ -59,7 +59,8 @@ struct CreatePostView: View {
     }
     
     func publishPost() {
-        guard let image = selectedImage, let currentUser = appData.currentUser else {
+        guard let image = selectedImage,
+              let currentUser = appData.currentUser else {
             print("❌ Erreur : image ou utilisateur introuvable")
             return
         }
@@ -69,7 +70,8 @@ struct CreatePostView: View {
             switch result {
             case .success(let imageURL):
                 let newPost = Post(authorId: currentUser.id, imageUrl: imageURL, timestamp: Date())
-                appData.addPost(newPost) // Sauvegarde dans Firestore (ou dans l'array local selon ton implémentation)
+                // Correction : sauvegarde le post dans Firestore pour qu'il soit persistant
+                appData.addPostToFirestore(newPost)
                 selectedImage = nil
                 print("✅ Post publié avec succès ! URL : \(imageURL)")
             case .failure(let error):
@@ -82,3 +84,4 @@ struct CreatePostView: View {
 #Preview {
     CreatePostView().environmentObject(AppData())
 }
+

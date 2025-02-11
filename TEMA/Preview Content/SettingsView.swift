@@ -13,7 +13,6 @@ struct SettingsView: View {
             Spacer()
 
             Button(action: {
-                // Appel de la méthode signOut d'AppData pour déconnecter via Firebase
                 appData.signOut()
             }) {
                 Text("Se déconnecter")

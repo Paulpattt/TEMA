@@ -6,7 +6,6 @@ struct TEMAApp: App {
     @StateObject private var appData = AppData()
     
     init() {
-        // Configuration de Firebase dès le démarrage de l'application.
         FirebaseApp.configure()
     }
     

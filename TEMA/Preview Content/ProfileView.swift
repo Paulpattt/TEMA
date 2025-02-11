@@ -3,27 +3,59 @@ import SwiftUI
 struct ProfileView: View {
     @EnvironmentObject var appData: AppData
     @State private var showSettings = false
+    @State private var showEditProfilePicture = false
 
     var body: some View {
         NavigationView {
             VStack {
                 // En-tête du profil
                 HStack {
-                    // Image de profil par défaut (ou personnalisée si tu en as une)
-                    Image(systemName: "person.crop.circle")
-                        .resizable()
-                        .frame(width: 80, height: 80)
-                        .foregroundColor(.gray)
+                    // Bouton pour changer la photo de profil
+                    Button(action: {
+                        showEditProfilePicture = true
+                    }) {
+                        if let profilePictureURL = appData.currentUser?.profilePicture,
+                           !profilePictureURL.isEmpty,
+                           let url = URL(string: profilePictureURL) {
+                            AsyncImage(url: url) { phase in
+                                switch phase {
+                                case .empty:
+                                    ProgressView()
+                                        .frame(width: 80, height: 80)
+                                case .success(let image):
+                                    image
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: 80, height: 80)
+                                        .clipShape(Circle())
+                                case .failure(_):
+                                    Image(systemName: "person.crop.circle")
+                                        .resizable()
+                                        .frame(width: 80, height: 80)
+                                        .foregroundColor(.gray)
+                                @unknown default:
+                                    Image(systemName: "person.crop.circle")
+                                        .resizable()
+                                        .frame(width: 80, height: 80)
+                                        .foregroundColor(.gray)
+                                }
+                            }
+                        } else {
+                            Image(systemName: "person.crop.circle")
+                                .resizable()
+                                .frame(width: 80, height: 80)
+                                .foregroundColor(.gray)
+                        }
+                    }
                     
                     VStack(alignment: .leading) {
-                        // Affiche uniquement le prénom
                         Text(firstName())
                             .font(.title)
                             .fontWeight(.bold)
                     }
                     Spacer()
                     
-                    // Bouton pour accéder aux réglages
+                    // Bouton engrenage pour accéder aux réglages
                     Button(action: {
                         showSettings.toggle()
                     }) {
@@ -49,14 +81,14 @@ struct ProfileView: View {
                 
                 Spacer()
             }
-            .navigationBarHidden(true) // Masque la barre de navigation pour ne pas afficher "Profil"
+            .navigationBarHidden(true)
             .sheet(isPresented: $showSettings) {
-                SettingsView()
+                SettingsView().environmentObject(appData)
+            
             }
         }
     }
     
-    /// Extrait le prénom du nom complet de l'utilisateur
     private func firstName() -> String {
         guard let fullName = appData.currentUser?.name, !fullName.isEmpty else {
             return "Utilisateur"
@@ -65,25 +97,6 @@ struct ProfileView: View {
     }
 }
 
-// Vue pour afficher un post individuel
-struct UserPostView: View {
-    var post: Post
-    
-    var body: some View {
-        VStack {
-            AsyncImage(url: URL(string: post.imageUrl)) { image in
-                image
-                    .resizable()
-                    .scaledToFit()
-                    .cornerRadius(10)
-                    .shadow(radius: 5)
-            } placeholder: {
-                ProgressView() // Affiche un indicateur de chargement en attendant l'image
-            }
-        }
-    }
-    
-    #Preview {
-        ProfileView().environmentObject(AppData())
-    }
+#Preview {
+    ProfileView().environmentObject(AppData())
 }
