@@ -4,13 +4,14 @@ struct ProfileView: View {
     @EnvironmentObject var appData: AppData
     @State private var showSettings = false
     @State private var showEditProfilePicture = false
+    @State private var showEditName = false  // Nouvelle variable pour la modale d'édition du nom
 
     var body: some View {
         NavigationView {
             VStack {
                 // En-tête du profil
                 HStack {
-                    // Bouton pour changer la photo de profil
+                    // Bouton pour modifier la photo de profil
                     Button(action: {
                         print("Clic sur la photo de profil – ouverture de la modale")
                         showEditProfilePicture = true
@@ -49,11 +50,17 @@ struct ProfileView: View {
                     }
                     .contentShape(Circle())
                     
-                    VStack(alignment: .leading) {
-                        Text(firstName())
+                    // Bouton pour éditer le nom (le nom complet est cliquable)
+                    Button(action: {
+                        print("Clic sur le nom – ouverture de la modale d'édition")
+                        showEditName = true
+                    }) {
+                        Text(appData.currentUser?.name ?? "Utilisateur")
                             .font(.title)
                             .fontWeight(.bold)
+                            .foregroundColor(.primary)
                     }
+                    
                     Spacer()
                     
                     // Bouton engrenage pour accéder aux réglages
@@ -89,14 +96,10 @@ struct ProfileView: View {
             .sheet(isPresented: $showEditProfilePicture) {
                 EditProfilePictureView().environmentObject(appData)
             }
+            .sheet(isPresented: $showEditName) {
+                EditProfileNameView().environmentObject(appData)
+            }
         }
-    }
-    
-    private func firstName() -> String {
-        guard let fullName = appData.currentUser?.name, !fullName.isEmpty else {
-            return "Utilisateur"
-        }
-        return fullName.split(separator: " ").first.map { String($0) } ?? "Utilisateur"
     }
 }
 

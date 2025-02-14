@@ -118,6 +118,22 @@ class AppData: ObservableObject {
             print("Erreur lors de la déconnexion : \(error.localizedDescription)")
         }
     }
+    // Méthode pour mettre à jour le nom de l'utilisateur dans Firestore
+    func updateUserName(firstName: String, lastName: String, completion: @escaping (Error?) -> Void) {
+        guard let userId = currentUser?.id else { return }
+        let fullName = "\(firstName) \(lastName)"
+        db.collection("users").document(userId).updateData(["name": fullName]) { error in
+            if let error = error {
+                print("❌ Erreur lors de la mise à jour du nom : \(error.localizedDescription)")
+            } else {
+                print("✅ Nom mis à jour avec succès")
+                DispatchQueue.main.async {
+                    self.currentUser?.name = fullName
+                }
+            }
+            completion(error)
+        }
+    }
     
     // Upload d'une image pour un post (inchangé)
     func uploadImage(_ image: UIImage, completion: @escaping (Result<String, Error>) -> Void) {

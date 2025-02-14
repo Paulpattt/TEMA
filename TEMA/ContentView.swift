@@ -71,8 +71,17 @@ struct MainAppView: View {
                     .tag(1)
 
                 CreatePostView()
-                    .tabItem { Image("createpostIcon") }
-                    .tag(2)
+                                    .tabItem {
+                                        VStack {
+                                            Image("createpostIcon")
+                                                .renderingMode(.template)
+                                                .resizable()
+                                                .aspectRatio(contentMode: .fit)
+                                                .frame(width: 50, height: 50) // Taille augmentée
+                                        }
+                                    }
+                                    .tag(2)
+
 
                 ChessView()
                     .tabItem { Image("chessIcon") }
