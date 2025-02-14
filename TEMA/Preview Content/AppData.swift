@@ -9,14 +9,14 @@ struct User: Identifiable, Codable {
     var name: String
     var email: String?
     var profilePicture: String?  // URL de la photo de profil
-    var authMethod: String?       // Par exemple, "Apple" ou "Email"
+    var authMethod: String?       // "Apple" ou "Email"
 }
 
-// Modèle Post : on stocke l'URL de l'image (et non l'image elle-même)
+// Modèle Post (inchangé)
 struct Post: Identifiable, Codable {
     var id: String = UUID().uuidString
     var authorId: String
-    var imageUrl: String // Utilise toujours "imageUrl" avec "u" minuscule
+    var imageUrl: String
     var timestamp: Date
 }
 
@@ -25,7 +25,7 @@ class AppData: ObservableObject {
     @Published var currentUser: User?
     @Published var posts: [Post] = []
     
-    private var db = Firestore.firestore()
+    var db = Firestore.firestore() // Exposé pour y accéder depuis d'autres fichiers
     private var authStateListenerHandle: AuthStateDidChangeListenerHandle?
     
     init() {
@@ -34,13 +34,29 @@ class AppData: ObservableObject {
                 if let firebaseUser = firebaseUser {
                     self?.isLoggedIn = true
                     let displayName = firebaseUser.displayName ?? "Utilisateur"
+                    // On crée un utilisateur (profilePicture est initialisé à nil, il sera mis à jour ensuite)
                     self?.currentUser = User(id: firebaseUser.uid, name: displayName, email: firebaseUser.email, profilePicture: nil, authMethod: "unknown")
                     print("Utilisateur connecté : \(firebaseUser.email ?? "inconnu")")
-                    self?.fetchPosts() // Recharge les posts dès la connexion
+                    
+                    // Récupère le document utilisateur dans Firestore pour mettre à jour profilePicture
+                    self?.db.collection("users").document(firebaseUser.uid).getDocument { document, error in
+                        if let error = error {
+                            print("Erreur lors de la récupération du document utilisateur : \(error.localizedDescription)")
+                        } else if let document = document, document.exists {
+                            let data = document.data() ?? [:]
+                            let profilePicture = data["profilePicture"] as? String ?? ""
+                            self?.currentUser?.profilePicture = profilePicture
+                            print("Photo de profil récupérée : \(profilePicture)")
+                        } else {
+                            print("Aucun document utilisateur trouvé pour l'UID \(firebaseUser.uid)")
+                        }
+                    }
+                    
+                    self?.fetchPosts()
                 } else {
                     self?.isLoggedIn = false
                     self?.currentUser = nil
-                    self?.posts = [] // On vide les posts à la déconnexion
+                    self?.posts = []
                     print("Aucun utilisateur connecté")
                 }
             }
@@ -103,7 +119,7 @@ class AppData: ObservableObject {
         }
     }
     
-    // Upload d'une image pour un post dans Firebase Storage
+    // Upload d'une image pour un post (inchangé)
     func uploadImage(_ image: UIImage, completion: @escaping (Result<String, Error>) -> Void) {
         guard let imageData = image.jpegData(compressionQuality: 0.8) else {
             completion(.failure(NSError(domain: "AppData", code: -1, userInfo: [NSLocalizedDescriptionKey: "Impossible de convertir l’image"])))
@@ -197,6 +213,41 @@ class AppData: ObservableObject {
                 DispatchQueue.main.async {
                     self.currentUser?.profilePicture = url
                 }
+            }
+        }
+    }
+    
+    // Sauvegarde ou mise à jour du document utilisateur dans Firestore
+    func saveUserToFirestore(_ user: User, completion: ((Error?) -> Void)? = nil) {
+        let userDocRef = db.collection("users").document(user.id)
+        userDocRef.getDocument { document, error in
+            var existingProfilePicture = ""
+            if let document = document, document.exists {
+                let data = document.data() ?? [:]
+                existingProfilePicture = data["profilePicture"] as? String ?? ""
+            }
+            let newUser = User(
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                profilePicture: existingProfilePicture, // On conserve la pp existante
+                authMethod: user.authMethod
+            )
+            userDocRef.setData([
+                "name": newUser.name,
+                "email": newUser.email ?? "",
+                "profilePicture": newUser.profilePicture ?? "",
+                "authMethod": newUser.authMethod ?? ""
+            ], merge: true) { error in
+                if let error = error {
+                    print("❌ Erreur lors de la sauvegarde de l'utilisateur dans Firestore : \(error.localizedDescription)")
+                } else {
+                    print("✅ Utilisateur enregistré dans Firestore")
+                }
+                completion?(error)
+            }
+            DispatchQueue.main.async {
+                self.currentUser = newUser
             }
         }
     }

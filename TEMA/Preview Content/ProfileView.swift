@@ -12,6 +12,7 @@ struct ProfileView: View {
                 HStack {
                     // Bouton pour changer la photo de profil
                     Button(action: {
+                        print("Clic sur la photo de profil – ouverture de la modale")
                         showEditProfilePicture = true
                     }) {
                         if let profilePictureURL = appData.currentUser?.profilePicture,
@@ -20,8 +21,7 @@ struct ProfileView: View {
                             AsyncImage(url: url) { phase in
                                 switch phase {
                                 case .empty:
-                                    ProgressView()
-                                        .frame(width: 80, height: 80)
+                                    ProgressView().frame(width: 80, height: 80)
                                 case .success(let image):
                                     image
                                         .resizable()
@@ -47,6 +47,7 @@ struct ProfileView: View {
                                 .foregroundColor(.gray)
                         }
                     }
+                    .contentShape(Circle())
                     
                     VStack(alignment: .leading) {
                         Text(firstName())
@@ -84,7 +85,9 @@ struct ProfileView: View {
             .navigationBarHidden(true)
             .sheet(isPresented: $showSettings) {
                 SettingsView().environmentObject(appData)
-            
+            }
+            .sheet(isPresented: $showEditProfilePicture) {
+                EditProfilePictureView().environmentObject(appData)
             }
         }
     }
