@@ -74,6 +74,7 @@ struct ProfileView: View {
                     }
                 }
                 .padding()
+                .frame(height: 75)
                 
                 Divider()
                 
