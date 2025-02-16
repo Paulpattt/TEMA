@@ -29,7 +29,7 @@ struct MainAppView: View {
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 0) {
+                VStack(spacing: 0) {
                 HeaderView(searchText: $searchText, isSearchActive: $isSearchActive)
                 
                 TabView(selection: $selectedTab) {
