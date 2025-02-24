@@ -6,11 +6,7 @@ struct SettingsView: View {
 
     var body: some View {
         VStack {
-            Text("Paramètres")
-                .font(.largeTitle)
-                .bold()
-                .padding()
-
+            
             Spacer()
 
             Button(action: {
