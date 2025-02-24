@@ -134,7 +134,12 @@ class AppData: ObservableObject {
     }
     
     // MARK: - Mise à jour du profil
-    
+    func deletePost(_ post: Post) {
+        // Supprimer le post dans ta base de données (Firestore, par exemple)
+        // Puis mettre à jour le tableau des posts localement
+        posts.removeAll { $0.id == post.id }
+        print("Post supprimé : \(post.id)")
+    }
     func updateUserName(firstName: String, lastName: String, completion: @escaping (Error?) -> Void) {
         guard let userId = currentUser?.id else { return }
         let fullName = "\(firstName) \(lastName)"

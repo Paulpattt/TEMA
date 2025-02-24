@@ -73,29 +73,76 @@ struct ProfileView: View {
                     ScrollView {
                         LazyVGrid(columns: columns, spacing: 2) {
                             ForEach(Array(profilePosts.enumerated()), id: \.offset) { index, post in
-                                Button(action: {
-                                    withAnimation {
-                                        selectedIndex = index
-                                    }
-                                }) {
-                                    if let url = URL(string: post.imageUrl) {
-                                        KFImage(url)
-                                            .placeholder {
-                                                ProgressView()
-                                                    .frame(width: UIScreen.main.bounds.width / 3,
-                                                           height: UIScreen.main.bounds.width / 3)
+                                if let url = URL(string: post.imageUrl) {
+                                    KFImage(url)
+                                        .placeholder {
+                                            ProgressView()
+                                                .frame(
+                                                    width: UIScreen.main.bounds.width / 3,
+                                                    height: UIScreen.main.bounds.width / 3
+                                                )
+                                        }
+                                        .cancelOnDisappear(true)
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(
+                                            width: UIScreen.main.bounds.width / 3,
+                                            height: UIScreen.main.bounds.width / 3
+                                        )
+                                        .clipped()
+                                        // Ajout du menu contextuel sur la grille
+                                        .contextMenu {
+                                            Button {
+                                                // Action "Statistiques"
+                                            } label: {
+                                                Label("Statistiques", systemImage: "chart.bar.fill")
                                             }
-                                            .cancelOnDisappear(true)
-                                            .resizable()
-                                            .scaledToFill()
-                                            .frame(width: UIScreen.main.bounds.width / 3,
-                                                   height: UIScreen.main.bounds.width / 3)
-                                            .clipped()
-                                    } else {
-                                        Color.gray
-                                            .frame(width: UIScreen.main.bounds.width / 3,
-                                                   height: UIScreen.main.bounds.width / 3)
-                                    }
+                                            
+                                            Button {
+                                                // Action "Épingler au profil"
+                                            } label: {
+                                                Label("Épingler au profil", systemImage: "pin.fill")
+                                            }
+                                            
+                                            Button {
+                                                // Action "Partager"
+                                            } label: {
+                                                Label("Partager", systemImage: "square.and.arrow.up")
+                                            }
+                                            
+                                            Button {
+                                                // Action "Ajuster l’aperçu"
+                                            } label: {
+                                                Label("Ajuster l’aperçu", systemImage: "rectangle.and.pencil.and_ellipsis")
+                                            }
+                                            
+                                            Button {
+                                                // Action "Archiver"
+                                            } label: {
+                                                Label("Archiver", systemImage: "archivebox")
+                                            }
+                                            
+                                            // Nouveau bouton pour supprimer la photo
+                                            Button {
+                                                // Ici, appelle ta fonction de suppression.
+                                                // Par exemple, si tu as une méthode dans ton appData :
+                                                appData.deletePost(post)
+                                            } label: {
+                                                Label("Supprimer", systemImage: "trash")
+                                            }
+                                        }
+                                        // Tap pour ouvrir la vue détaillée du post
+                                        .onTapGesture {
+                                            withAnimation {
+                                                selectedIndex = index
+                                            }
+                                        }
+                                } else {
+                                    Color.gray
+                                        .frame(
+                                            width: UIScreen.main.bounds.width / 3,
+                                            height: UIScreen.main.bounds.width / 3
+                                        )
                                 }
                             }
                         }
@@ -106,10 +153,12 @@ struct ProfileView: View {
                 
                 // Vue de détail (carrousel) si un post est sélectionné
                 if let index = selectedIndex {
+                    // Fond semi-transparent
                     Color.black.opacity(0.9)
                         .edgesIgnoringSafeArea(.all)
                         .transition(.opacity)
                     
+                    // Carrousel en plein écran
                     TabView(selection: Binding(
                         get: { index },
                         set: { newValue in
@@ -140,6 +189,47 @@ struct ProfileView: View {
                                         EmptyView()
                                     }
                                 }
+                                // Menu contextuel sur la vue détaillée
+                                .contextMenu {
+                                    Button {
+                                        // Action "Statistiques"
+                                    } label: {
+                                        Label("Statistiques", systemImage: "chart.bar.fill")
+                                    }
+                                    
+                                    Button {
+                                        // Action "Épingler au profil"
+                                    } label: {
+                                        Label("Épingler au profil", systemImage: "pin.fill")
+                                    }
+                                    
+                                    Button {
+                                        // Action "Partager"
+                                    } label: {
+                                        Label("Partager", systemImage: "square.and.arrow.up")
+                                    }
+                                    
+                                    Button {
+                                        // Action "Ajuster l’aperçu"
+                                    } label: {
+                                        Label("Ajuster l’aperçu", systemImage: "rectangle.and.pencil.and_ellipsis")
+                                    }
+                                    
+                                    Button {
+                                        // Action "Archiver"
+                                    } label: {
+                                        Label("Archiver", systemImage: "archivebox")
+                                    }
+                                    
+                                    // Nouveau bouton pour supprimer la photo
+                                    Button {
+                                        // Ici, appelle ta fonction de suppression.
+                                        // Par exemple, si tu as une méthode dans ton appData :
+                                        appData.deletePost(post)
+                                    } label: {
+                                        Label("Supprimer", systemImage: "trash")
+                                    }
+                                }
                                 .tag(i)
                             } else {
                                 Color.gray
@@ -150,15 +240,15 @@ struct ProfileView: View {
                     .tabViewStyle(PageTabViewStyle(indexDisplayMode: .always))
                     .transition(.move(edge: .bottom))
                     
-                    // Bouton pour fermer la vue détail
+                    // Bouton pour fermer la vue détaillée
                     Button(action: {
                         withAnimation {
                             selectedIndex = nil
                         }
                     }) {
                         Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.white)
                             .font(.system(size: 30))
+                            .foregroundColor(.white)
                             .padding()
                     }
                     .position(x: 40, y: 50)
@@ -168,12 +258,10 @@ struct ProfileView: View {
             Spacer()
         }
         .navigationBarHidden(true)
-        // Présentation conditionnelle de EditProfilePictureView selon iOS version
         .sheet(isPresented: $showEditProfilePicture) {
             if #available(iOS 16.0, *) {
                 EditProfilePictureView().environmentObject(appData)
             } else {
-                // Fallback : ici, tu pourrais présenter une vue alternative ou un simple message
                 Text("La modification de la photo n'est pas disponible sur cette version")
             }
         }
