@@ -4,20 +4,24 @@ import FirebaseStorage
 
 @available(iOS 16.0, *)
 struct CreatePostView: View {
+    @Environment(\.dismiss) var dismiss
     @EnvironmentObject var appData: AppData
     @State private var isPhotoPickerPresented = false
     @State private var selectedItem: PhotosPickerItem? = nil
     @State private var selectedImage: UIImage? = nil
-    
+
     var body: some View {
         ZStack {
             // Fond adaptatif (clair/sombre)
             Color(UIColor.systemBackground)
                 .ignoresSafeArea()
-            
-            // Si une image est sélectionnée, on l'affiche avec un bouton pour publier le post
+
             if let image = selectedImage {
+                // Vue de prévisualisation avec l'image et le bouton Publier
                 VStack {
+                    // On ajoute un espace pour éviter que le bouton "x" chevauche l'image
+                    Spacer().frame(height: 60)
+                    
                     Image(uiImage: image)
                         .resizable()
                         .scaledToFit()
@@ -35,9 +39,24 @@ struct CreatePostView: View {
                             .cornerRadius(10)
                     }
                     .padding()
+                    
+                    Spacer()
                 }
+                // Superposition d'un bouton "x" positionné en haut à gauche avec plus de padding pour le décoller de l'image
+                .overlay(
+                    Button(action: {
+                        // Réinitialise selectedImage pour revenir à l'écran initial
+                        selectedImage = nil
+                    }) {
+                        Image(systemName: "xmark")
+                            .font(.title)
+                            .foregroundColor(.primary)
+                            .padding(20)
+                    },
+                    alignment: .topLeading
+                )
             } else {
-                // Affiche uniquement le "+" au centre de la vue
+                // Vue initiale avec le "+"
                 Button(action: {
                     isPhotoPickerPresented = true
                 }) {
@@ -65,16 +84,15 @@ struct CreatePostView: View {
             print("❌ Erreur : image ou utilisateur introuvable")
             return
         }
-        
         print("Début de l'upload de l'image...")
         appData.uploadImage(image) { result in
             switch result {
             case .success(let imageURL):
                 let newPost = Post(authorId: currentUser.id, imageUrl: imageURL, timestamp: Date())
-                // Correction : sauvegarde le post dans Firestore pour qu'il soit persistant
                 appData.addPostToFirestore(newPost)
                 selectedImage = nil
                 print("✅ Post publié avec succès ! URL : \(imageURL)")
+                dismiss()
             case .failure(let error):
                 print("❌ Erreur lors de l'upload : \(error.localizedDescription)")
             }
@@ -86,7 +104,6 @@ struct CreatePostView: View {
     if #available(iOS 16.0, *) {
         CreatePostView().environmentObject(AppData())
     } else {
-        // Fallback on earlier versions
+        EmptyView()
     }
 }
-
