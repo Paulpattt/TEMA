@@ -18,13 +18,16 @@ struct SearchView: View {
                     .padding()
             } else {
                 List(results) { user in
-                    VStack(alignment: .leading) {
-                        Text(user.name)
-                            .font(.body)
-                        if let email = user.email {
-                            Text(email)
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
+                    NavigationLink(destination: UserProfileView(user: user)
+                                    .environmentObject(appData)) {
+                        VStack(alignment: .leading) {
+                            Text(user.name)
+                                .font(.body)
+                            if let email = user.email {
+                                Text(email)
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                            }
                         }
                     }
                 }
@@ -54,6 +57,7 @@ struct SearchView: View {
 
 #Preview {
     NavigationView {
-        SearchView(searchQuery: "paul").environmentObject(AppData())
+        SearchView(searchQuery: "paulpaturel")
+            .environmentObject(AppData())
     }
 }

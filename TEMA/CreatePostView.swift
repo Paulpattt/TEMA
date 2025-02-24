@@ -2,6 +2,7 @@ import SwiftUI
 import PhotosUI
 import FirebaseStorage
 
+@available(iOS 16.0, *)
 struct CreatePostView: View {
     @EnvironmentObject var appData: AppData
     @State private var isPhotoPickerPresented = false
@@ -82,6 +83,10 @@ struct CreatePostView: View {
 }
 
 #Preview {
-    CreatePostView().environmentObject(AppData())
+    if #available(iOS 16.0, *) {
+        CreatePostView().environmentObject(AppData())
+    } else {
+        // Fallback on earlier versions
+    }
 }
 

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject var appData: AppData
+    @Environment(\.dismiss) var dismiss
 
     var body: some View {
         VStack {
@@ -22,13 +23,24 @@ struct SettingsView: View {
                     .background(Color.red)
                     .cornerRadius(8)
             }
-            .padding(.bottom, 50)
             .padding(.horizontal, 20)
+            .padding(.bottom, 50)
         }
         .padding()
+        // Titre et configuration par défaut de la barre
+        .navigationTitle("Paramètres")
+        .navigationBarTitleDisplayMode(.inline)
+        // Aucune personnalisation du bouton "Back" :
+        // - Pas de .navigationBarBackButtonDisplayMode(.minimal)
+        // - Pas de .navigationBarBackButtonHidden(true)
+        // => Le bouton "Back" système, avec texte, est affiché et le swipe fonctionne.
     }
 }
 
-#Preview {
-    SettingsView().environmentObject(AppData())
+struct SettingsView_Previews: PreviewProvider {
+    static var previews: some View {
+        NavigationView {
+            SettingsView().environmentObject(AppData())
+        }
+    }
 }

@@ -7,6 +7,7 @@
 import SwiftUI
 import PhotosUI
 
+@available(iOS 16.0, *)
 struct EditProfilePictureView: View {
     @EnvironmentObject var appData: AppData
     @Environment(\.dismiss) var dismiss
@@ -83,5 +84,9 @@ struct EditProfilePictureView: View {
 }
 
 #Preview {
-    EditProfilePictureView().environmentObject(AppData())
+    if #available(iOS 16.0, *) {
+        EditProfilePictureView().environmentObject(AppData())
+    } else {
+        // Fallback on earlier versions
+    }
 }

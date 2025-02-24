@@ -11,6 +11,7 @@
 		F339166E2D4AFD3E000F8B68 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = F339166D2D4AFD3E000F8B68 /* FirebaseAuth */; };
 		F33916702D4AFD3E000F8B68 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = F339166F2D4AFD3E000F8B68 /* FirebaseFirestore */; };
 		F33916722D4AFD3E000F8B68 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = F33916712D4AFD3E000F8B68 /* FirebaseStorage */; };
+		F3C3ABDA2D6B713700D3D967 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = F3C3ABD92D6B713700D3D967 /* Kingfisher */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -36,22 +37,9 @@
 		F32691BD2D46E8150061DC55 /* TEMAUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TEMAUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		F3B8F7662D4E90F10091473F /* Exceptions for "TEMA" folder in "TEMA" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				"GoogleService-Info.plist",
-			);
-			target = F32691A22D46E8140061DC55 /* TEMA */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		F32691A52D46E8140061DC55 /* TEMA */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				F3B8F7662D4E90F10091473F /* Exceptions for "TEMA" folder in "TEMA" target */,
-			);
 			path = TEMA;
 			sourceTree = "<group>";
 		};
@@ -76,6 +64,7 @@
 				F33916722D4AFD3E000F8B68 /* FirebaseStorage in Frameworks */,
 				F339166E2D4AFD3E000F8B68 /* FirebaseAuth in Frameworks */,
 				F33916702D4AFD3E000F8B68 /* FirebaseFirestore in Frameworks */,
+				F3C3ABDA2D6B713700D3D967 /* Kingfisher in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -140,6 +129,7 @@
 				F339166D2D4AFD3E000F8B68 /* FirebaseAuth */,
 				F339166F2D4AFD3E000F8B68 /* FirebaseFirestore */,
 				F33916712D4AFD3E000F8B68 /* FirebaseStorage */,
+				F3C3ABD92D6B713700D3D967 /* Kingfisher */,
 			);
 			productName = TEMA;
 			productReference = F32691A32D46E8140061DC55 /* TEMA.app */;
@@ -225,6 +215,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				F339166A2D4AFD3E000F8B68 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				F3C3ABD82D6B713700D3D967 /* XCRemoteSwiftPackageReference "Kingfisher" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = F32691A42D46E8140061DC55 /* Products */;
@@ -424,6 +415,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = TEMA/TEMA.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -431,19 +423,25 @@
 				DEVELOPMENT_TEAM = X9F74KV6QN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				NEW_SETTING = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.LeBas.TEMA;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -455,6 +453,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = TEMA/TEMA.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -462,19 +461,25 @@
 				DEVELOPMENT_TEAM = X9F74KV6QN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				NEW_SETTING = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.LeBas.TEMA;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -603,6 +608,14 @@
 				minimumVersion = 11.7.0;
 			};
 		};
+		F3C3ABD82D6B713700D3D967 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.2.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -625,6 +638,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = F339166A2D4AFD3E000F8B68 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseStorage;
+		};
+		F3C3ABD92D6B713700D3D967 /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F3C3ABD82D6B713700D3D967 /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

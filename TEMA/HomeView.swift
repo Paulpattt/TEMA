@@ -8,14 +8,15 @@ struct HomeView: View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 20) {
-                    // On trie par timestamp décroissant
+                    // Trie par timestamp décroissant
                     ForEach(appData.posts.sorted(by: { $0.timestamp > $1.timestamp })) { post in
                         PostView(post: post)
                     }
                 }
-                .padding()
+                // On retire le padding horizontal pour occuper toute la largeur
+                .padding(.vertical)
             }
-            .navigationBarHidden(true) // Masque la barre de navigation
+            .navigationBarHidden(true)
         }
     }
 }
@@ -28,13 +29,15 @@ struct PostView: View {
             AsyncImage(url: url, transaction: Transaction(animation: .easeIn)) { phase in
                 switch phase {
                 case .empty:
-                    ProgressView().frame(height: 200)
+                    ProgressView()
+                        .frame(height: 200)
                 case .success(let image):
                     image
                         .resizable()
-                        .scaledToFit()
-                        .cornerRadius(10)
-                        .shadow(radius: 5)
+                        .scaledToFit()        // L'image s'ajuste pour occuper toute la largeur sans être coupée
+                        //.cornerRadius(0)      // Pas de coins arrondis
+                        //.shadow(radius: 0)      // Pas d'ombre
+                        .frame(maxWidth: .infinity)
                 case .failure(let error):
                     VStack {
                         Image(systemName: "exclamationmark.triangle")
@@ -52,7 +55,8 @@ struct PostView: View {
                 print("Chargement de l'image depuis URL: \(url.absoluteString)")
             }
         } else {
-            Color.gray.frame(height: 200)
+            Color.gray
+                .frame(height: 200)
         }
     }
 }
