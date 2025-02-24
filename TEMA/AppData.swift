@@ -10,7 +10,7 @@ struct User: Identifiable, Codable {
     var name: String
     var email: String?
     var profilePicture: String?  // URL de la photo de profil
-    var authMethod: String?       // "Apple" ou "Email"
+    var authMethod: String?      // "Apple" ou "Email"
 }
 
 struct Post: Identifiable, Codable {
@@ -27,16 +27,16 @@ class AppData: ObservableObject {
     @Published var currentUser: User?
     @Published var posts: [Post] = []
     
-    var db = Firestore.firestore() // Exposé pour les requêtes Firestore
+    var db = Firestore.firestore()
     private var authStateListenerHandle: AuthStateDidChangeListenerHandle?
     
     init() {
-        authStateListenerHandle = Auth.auth().addStateDidChangeListener { [weak self] auth, firebaseUser in
+        authStateListenerHandle = Auth.auth().addStateDidChangeListener { [weak self] _, firebaseUser in
             DispatchQueue.main.async {
                 if let firebaseUser = firebaseUser {
                     self?.isLoggedIn = true
                     let displayName = firebaseUser.displayName ?? "Utilisateur"
-                    // Création initiale de l'utilisateur (profilePicture est nil, puis sera mis à jour)
+                    // Création initiale de l'utilisateur
                     self?.currentUser = User(id: firebaseUser.uid,
                                              name: displayName,
                                              email: firebaseUser.email,
@@ -44,7 +44,7 @@ class AppData: ObservableObject {
                                              authMethod: "unknown")
                     print("Utilisateur connecté : \(firebaseUser.email ?? "inconnu")")
                     
-                    // Récupération du document utilisateur dans Firestore pour actualiser profilePicture et le nom
+                    // Récupération du document utilisateur dans Firestore
                     self?.db.collection("users").document(firebaseUser.uid).getDocument { document, error in
                         if let error = error {
                             print("Erreur lors de la récupération du document utilisateur : \(error.localizedDescription)")
@@ -80,7 +80,7 @@ class AppData: ObservableObject {
     // MARK: - Authentification
     
     func signInWithEmail(email: String, password: String, completion: @escaping (Error?) -> Void) {
-        Auth.auth().signIn(withEmail: email, password: password) { authResult, error in
+        Auth.auth().signIn(withEmail: email, password: password) { _, error in
             if let error = error {
                 print("Erreur lors de la connexion : \(error.localizedDescription)")
                 completion(error)
@@ -133,13 +133,40 @@ class AppData: ObservableObject {
         }
     }
     
-    // MARK: - Mise à jour du profil
+    // MARK: - Supprimer un post
     func deletePost(_ post: Post) {
-        // Supprimer le post dans ta base de données (Firestore, par exemple)
-        // Puis mettre à jour le tableau des posts localement
-        posts.removeAll { $0.id == post.id }
-        print("Post supprimé : \(post.id)")
+        guard !post.id.isEmpty else {
+            print("Impossible de supprimer, post.id est vide.")
+            return
+        }
+        
+        db.collection("posts").document(post.id).delete { [weak self] error in
+            if let error = error {
+                print("Erreur lors de la suppression du post Firestore : \(error.localizedDescription)")
+            } else {
+                print("Post supprimé de Firestore : \(post.id)")
+                
+                // Retirer du tableau local
+                DispatchQueue.main.async {
+                    self?.posts.removeAll { $0.id == post.id }
+                }
+                
+                // Supprimer l'image dans Storage
+                if !post.imageUrl.isEmpty {
+                    let storageRef = Storage.storage().reference(forURL: post.imageUrl)
+                    storageRef.delete { storageError in
+                        if let storageError = storageError {
+                            print("Erreur lors de la suppression de l'image : \(storageError.localizedDescription)")
+                        } else {
+                            print("Image supprimée du Storage.")
+                        }
+                    }
+                }
+            }
+        }
     }
+    
+    // MARK: - Mise à jour du profil
     func updateUserName(firstName: String, lastName: String, completion: @escaping (Error?) -> Void) {
         guard let userId = currentUser?.id else { return }
         let fullName = "\(firstName) \(lastName)"
@@ -160,7 +187,6 @@ class AppData: ObservableObject {
     }
     
     // MARK: - Upload d'image
-    
     func uploadImage(_ image: UIImage, completion: @escaping (Result<String, Error>) -> Void) {
         guard let imageData = image.jpegData(compressionQuality: 0.8) else {
             completion(.failure(NSError(domain: "AppData", code: -1, userInfo: [NSLocalizedDescriptionKey: "Impossible de convertir l’image"])))
@@ -172,7 +198,7 @@ class AppData: ObservableObject {
         let metadata = StorageMetadata()
         metadata.contentType = "image/jpeg"
         
-        imageRef.putData(imageData, metadata: metadata) { metadata, error in
+        imageRef.putData(imageData, metadata: metadata) { _, error in
             if let error = error {
                 completion(.failure(error))
                 return
@@ -188,13 +214,15 @@ class AppData: ObservableObject {
         }
     }
     
+    // MARK: - Créer / Mettre à jour un post dans Firestore
     func addPostToFirestore(_ post: Post) {
         do {
-            _ = try db.collection("posts").addDocument(from: post) { error in
+            // IMPORTANT : On force Firestore à utiliser post.id comme ID du document
+            try db.collection("posts").document(post.id).setData(from: post) { error in
                 if let error = error {
                     print("Erreur lors de l'ajout du post dans Firestore : \(error.localizedDescription)")
                 } else {
-                    print("Post sauvegardé dans Firestore")
+                    print("Post sauvegardé dans Firestore avec l'ID : \(post.id)")
                 }
             }
         } catch {
@@ -202,6 +230,7 @@ class AppData: ObservableObject {
         }
     }
     
+    // MARK: - Récupérer les posts
     func fetchPosts() {
         db.collection("posts")
             .order(by: "timestamp", descending: true)
@@ -216,7 +245,7 @@ class AppData: ObservableObject {
             }
     }
     
-    // Upload d'une image pour la photo de profil et mise à jour dans Firestore
+    // MARK: - Photo de profil
     func uploadProfileImage(_ image: UIImage, forUser user: User, completion: @escaping (Result<URL, Error>) -> Void) {
         let storageRef = Storage.storage().reference().child("profile_pictures/\(user.id).png")
         guard let data = image.pngData() else {
@@ -224,7 +253,7 @@ class AppData: ObservableObject {
             return
         }
         
-        storageRef.putData(data, metadata: nil) { metadata, error in
+        storageRef.putData(data, metadata: nil) { _, error in
             if let error = error {
                 completion(.failure(error))
                 return
@@ -255,7 +284,6 @@ class AppData: ObservableObject {
         }
     }
     
-    // Sauvegarde ou mise à jour du document utilisateur dans Firestore, incluant le champ "searchName"
     func saveUserToFirestore(_ user: User, completion: ((Error?) -> Void)? = nil) {
         let userDocRef = db.collection("users").document(user.id)
         let searchName = user.name.lowercased()

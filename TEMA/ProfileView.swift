@@ -90,7 +90,6 @@ struct ProfileView: View {
                                             height: UIScreen.main.bounds.width / 3
                                         )
                                         .clipped()
-                                        // Ajout du menu contextuel sur la grille
                                         .contextMenu {
                                             Button {
                                                 // Action "Statistiques"
@@ -110,10 +109,11 @@ struct ProfileView: View {
                                                 Label("Partager", systemImage: "square.and.arrow.up")
                                             }
                                             
+                                            // iOS16+ symbol, attention
                                             Button {
                                                 // Action "Ajuster l’aperçu"
                                             } label: {
-                                                Label("Ajuster l’aperçu", systemImage: "rectangle.and.pencil.and_ellipsis")
+                                                Label("Ajuster l’aperçu", systemImage: "rectangle.and.pencil.and.ellipsis")
                                             }
                                             
                                             Button {
@@ -122,16 +122,13 @@ struct ProfileView: View {
                                                 Label("Archiver", systemImage: "archivebox")
                                             }
                                             
-                                            // Nouveau bouton pour supprimer la photo
                                             Button {
-                                                // Ici, appelle ta fonction de suppression.
-                                                // Par exemple, si tu as une méthode dans ton appData :
+                                                // Supprimer le post
                                                 appData.deletePost(post)
                                             } label: {
                                                 Label("Supprimer", systemImage: "trash")
                                             }
                                         }
-                                        // Tap pour ouvrir la vue détaillée du post
                                         .onTapGesture {
                                             withAnimation {
                                                 selectedIndex = index
@@ -153,12 +150,10 @@ struct ProfileView: View {
                 
                 // Vue de détail (carrousel) si un post est sélectionné
                 if let index = selectedIndex {
-                    // Fond semi-transparent
                     Color.black.opacity(0.9)
                         .edgesIgnoringSafeArea(.all)
                         .transition(.opacity)
                     
-                    // Carrousel en plein écran
                     TabView(selection: Binding(
                         get: { index },
                         set: { newValue in
@@ -177,19 +172,13 @@ struct ProfileView: View {
                                             .resizable()
                                             .scaledToFit()
                                             .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                    case .failure(let error):
-                                        VStack {
-                                            Image(systemName: "exclamationmark.triangle")
-                                                .foregroundColor(.red)
-                                            Text("Erreur : \(error.localizedDescription)")
-                                                .font(.caption)
-                                                .multilineTextAlignment(.center)
-                                        }
+                                    case .failure(_):
+                                        // On affiche rien au lieu d'un message d'erreur
+                                        EmptyView()
                                     @unknown default:
                                         EmptyView()
                                     }
                                 }
-                                // Menu contextuel sur la vue détaillée
                                 .contextMenu {
                                     Button {
                                         // Action "Statistiques"
@@ -209,38 +198,32 @@ struct ProfileView: View {
                                         Label("Partager", systemImage: "square.and.arrow.up")
                                     }
                                     
+                                    // iOS16+ symbol, attention
                                     Button {
                                         // Action "Ajuster l’aperçu"
                                     } label: {
-                                        Label("Ajuster l’aperçu", systemImage: "rectangle.and.pencil.and_ellipsis")
+                                        Label("Ajuster l’aperçu", systemImage: "rectangle.and.pencil.and.ellipsis")
                                     }
                                     
                                     Button {
-                                        // Action "Archiver"
-                                    } label: {
-                                        Label("Archiver", systemImage: "archivebox")
-                                    }
-                                    
-                                    // Nouveau bouton pour supprimer la photo
-                                    Button {
-                                        // Ici, appelle ta fonction de suppression.
-                                        // Par exemple, si tu as une méthode dans ton appData :
+                                        // Supprimer le post
                                         appData.deletePost(post)
+                                        withAnimation {
+                                            selectedIndex = nil
+                                        }
                                     } label: {
                                         Label("Supprimer", systemImage: "trash")
                                     }
                                 }
                                 .tag(i)
                             } else {
-                                Color.gray
-                                    .tag(i)
+                                Color.gray.tag(i)
                             }
                         }
                     }
                     .tabViewStyle(PageTabViewStyle(indexDisplayMode: .always))
                     .transition(.move(edge: .bottom))
                     
-                    // Bouton pour fermer la vue détaillée
                     Button(action: {
                         withAnimation {
                             selectedIndex = nil
