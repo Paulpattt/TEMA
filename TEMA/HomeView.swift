@@ -1,4 +1,5 @@
 import SwiftUI
+import Kingfisher
 
 struct HomeView: View {
     @EnvironmentObject var appData: AppData
@@ -26,34 +27,16 @@ struct PostView: View {
     
     var body: some View {
         if let url = URL(string: post.imageUrl) {
-            AsyncImage(url: url, transaction: Transaction(animation: .easeIn)) { phase in
-                switch phase {
-                case .empty:
+            KFImage(url)
+                .placeholder {
                     ProgressView()
-                        .frame(height: 200)
-                case .success(let image):
-                    image
-                        .resizable()
-                        .scaledToFit()        // L'image s'ajuste pour occuper toute la largeur sans être coupée
-                        //.cornerRadius(0)      // Pas de coins arrondis
-                        //.shadow(radius: 0)      // Pas d'ombre
-                        .frame(maxWidth: .infinity)
-                case .failure(let error):
-                    VStack {
-                        Image(systemName: "exclamationmark.triangle")
-                            .foregroundColor(.red)
-                        Text("Erreur : \(error.localizedDescription)")
-                            .font(.caption)
-                            .multilineTextAlignment(.center)
-                    }
-                    .frame(height: 200)
-                @unknown default:
-                    EmptyView()
+                        .frame(height: 200) // Hauteur du placeholder uniquement
                 }
-            }
-            .onAppear {
-                print("Chargement de l'image depuis URL: \(url.absoluteString)")
-            }
+                .cancelOnDisappear(true)
+                .resizable()
+                .scaledToFit()                  // Conserve le ratio, s'adapte à la largeur
+                .frame(width: UIScreen.main.bounds.width)
+                .clipped()
         } else {
             Color.gray
                 .frame(height: 200)

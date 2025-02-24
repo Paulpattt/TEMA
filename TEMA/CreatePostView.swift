@@ -89,6 +89,11 @@ struct CreatePostView: View {
             switch result {
             case .success(let imageURL):
                 let newPost = Post(authorId: currentUser.id, imageUrl: imageURL, timestamp: Date())
+                // Insérer immédiatement le post dans appData.posts
+                DispatchQueue.main.async {
+                    self.appData.posts.insert(newPost, at: 0)
+                }
+                // Sauvegarder dans Firestore (avec l'ID forcé à newPost.id)
                 appData.addPostToFirestore(newPost)
                 selectedImage = nil
                 print("✅ Post publié avec succès ! URL : \(imageURL)")
