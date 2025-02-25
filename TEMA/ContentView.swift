@@ -19,7 +19,7 @@ struct ContentView: View {
             appearance.stackedLayoutAppearance.selected.iconColor = temaRed
             appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: temaRed]
             
-            // Optionnel : pour les autres dispositions sur iPad, etc.
+            // Optionnel : pour les autres dispositions (iPad, etc.)
             appearance.inlineLayoutAppearance.selected.iconColor = temaRed
             appearance.inlineLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: temaRed]
             appearance.compactInlineLayoutAppearance.selected.iconColor = temaRed
@@ -61,9 +61,10 @@ struct ContentView: View {
                         Text("TEMA")
                             .font(.largeTitle)
                             .bold()
-                            // Ici, on peut définir la couleur souhaitée pour ce bouton (ici on le laisse en rouge ou en couleur personnalisée)
                             .foregroundColor(Color("TEMA_Red"))
                     }
+                    // Décale le logo TEMA vers la droite
+                    .padding(.leading, 12)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     
                     Spacer()
@@ -94,10 +95,11 @@ struct ContentView: View {
                     }
                     .frame(width: geometry.size.width / 2, alignment: .trailing)
                 }
-                .padding(.horizontal)
+                // On peut conserver un padding à droite pour équilibrer
+                .padding(.trailing, 16)
                 .frame(height: geometry.size.height)
             }
-            .frame(height: 50)
+            .frame(height: 42)
             .background(Color(UIColor.systemBackground))
             
             // TabView en bas
@@ -130,7 +132,6 @@ struct ContentView: View {
                     .tabItem { Image("profileIcon") }
                     .tag(4)
             }
-            // Pas d'appel à .tint ici car la TabBar est personnalisée via UITabBarAppearance
         }
         .background(
             // NavigationLink invisible pour lancer SearchView

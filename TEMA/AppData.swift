@@ -25,8 +25,34 @@ struct Post: Identifiable, Codable {
 class AppData: ObservableObject {
     @Published var isLoggedIn: Bool = false
     @Published var currentUser: User?
+    @Published var userCache: [String: User] = [:]
     @Published var posts: [Post] = []
     
+    func getUser(for id: String, completion: @escaping (User?) -> Void) {
+            if let cachedUser = userCache[id] {
+                completion(cachedUser)
+            } else {
+                let db = Firestore.firestore()
+                db.collection("users").document(id).getDocument { document, error in
+                    if let document = document, document.exists, let data = document.data() {
+                        do {
+                            let jsonData = try JSONSerialization.data(withJSONObject: data)
+                            let fetchedUser = try JSONDecoder().decode(User.self, from: jsonData)
+                            DispatchQueue.main.async {
+                                self.userCache[id] = fetchedUser
+                            }
+                            completion(fetchedUser)
+                        } catch {
+                            print("Erreur de décodage: \(error.localizedDescription)")
+                            completion(nil)
+                        }
+                    } else {
+                        print("Erreur lors du chargement de l'utilisateur: \(error?.localizedDescription ?? "Document inexistant")")
+                        completion(nil)
+                    }
+                }
+            }
+        }
     var db = Firestore.firestore()
     private var authStateListenerHandle: AuthStateDidChangeListenerHandle?
     
