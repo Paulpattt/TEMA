@@ -36,17 +36,17 @@ struct ProfileView: View {
                         KFImage(url)
                             .placeholder {
                                 ProgressView()
-                                    .frame(width: 92, height: 92)
+                                    .frame(width: 80, height: 80)
                             }
                             .cancelOnDisappear(true)
                             .resizable()
                             .scaledToFill()
-                            .frame(width: 92, height: 92)
+                            .frame(width: 80, height: 80)
                             .clipShape(Circle())
                     } else {
                         Image(systemName: "person.crop.circle")
                             .resizable()
-                            .frame(width: 92, height: 92)
+                            .frame(width: 80, height: 80)
                             .foregroundColor(.gray)
                     }
                 }

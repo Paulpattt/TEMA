@@ -31,6 +31,9 @@
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="vDu-zF-Fre"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <accessibility key="accessibilityConfiguration">
+                            <accessibilityTraits key="traits" staticText="YES"/>
+                        </accessibility>
                         <constraints>
                             <constraint firstItem="bSt-Rv-Obd" firstAttribute="centerX" secondItem="5EZ-qb-Rvc" secondAttribute="centerX" id="2HJ-Nn-Plh"/>
                             <constraint firstItem="bSt-Rv-Obd" firstAttribute="centerY" secondItem="5EZ-qb-Rvc" secondAttribute="centerY" constant="25" id="6YB-Dr-FCt"/>

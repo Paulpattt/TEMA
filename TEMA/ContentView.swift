@@ -51,87 +51,93 @@ struct ContentView: View {
     // Le contenu principal de l'app : header + TabView
     private var mainContent: some View {
         VStack(spacing: 0) {
-            // Header : titre "TEMA" et barre de recherche
-            GeometryReader { geometry in
-                HStack {
-                    // Bouton TEMA : ramène à l'onglet Home
-                    Button(action: {
-                        selectedTab = 0
-                    }) {
-                        Text("TEMA")
-                            .font(.largeTitle)
-                            .bold()
-                            .foregroundColor(Color("TEMA_Red"))
-                    }
-                    // Décale le logo TEMA vers la droite
-                    .padding(.leading, 12)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    
-                    Spacer()
-                    
-                    // Barre de recherche
-                    HStack(spacing: 8) {
-                        Image(systemName: "magnifyingglass")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 20, height: 20)
-                            .foregroundColor(.primary)
+            // Header conditionnel
+            if !hideHeader {
+                GeometryReader { geometry in
+                    HStack {
+                        // Bouton TEMA : ramène à l'onglet Home
+                        Button(action: {
+                            selectedTab = 0
+                        }) {
+                            Text("TEMA")
+                                .font(.largeTitle)
+                                .bold()
+                                .foregroundColor(Color("TEMA_Red"))
+                        }
+                        // Décale le logo TEMA vers la droite
+                        .padding(.leading, 12)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         
-                        TextField("", text: $searchText, onCommit: {
-                            if !searchText.isEmpty {
-                                isSearchActive = true
-                            }
-                        })
-                        .textFieldStyle(PlainTextFieldStyle())
-                        .foregroundColor(.primary)
-                        .frame(height: 34)
-                        .overlay(
-                            Rectangle()
-                                .frame(height: 2)
-                                .foregroundColor(.gray)
-                                .offset(y: -5),
-                            alignment: .bottom
-                        )
+                        Spacer()
+                        
+                        // Barre de recherche
+                        HStack(spacing: 8) {
+                            Image(systemName: "magnifyingglass")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 20, height: 20)
+                                .foregroundColor(.primary)
+                            
+                            TextField("", text: $searchText, onCommit: {
+                                if !searchText.isEmpty {
+                                    isSearchActive = true
+                                }
+                            })
+                            .textFieldStyle(PlainTextFieldStyle())
+                            .foregroundColor(.primary)
+                            .frame(height: 34)
+                            .overlay(
+                                Rectangle()
+                                    .frame(height: 2)
+                                    .foregroundColor(.gray)
+                                    .offset(y: -5),
+                                alignment: .bottom
+                            )
+                        }
+                        .frame(width: geometry.size.width / 2, alignment: .trailing)
                     }
-                    .frame(width: geometry.size.width / 2, alignment: .trailing)
+                    // On peut conserver un padding à droite pour équilibrer
+                    .padding(.trailing, 16)
+                    .frame(height: geometry.size.height)
                 }
-                // On peut conserver un padding à droite pour équilibrer
-                .padding(.trailing, 16)
-                .frame(height: geometry.size.height)
+                .frame(height: 55)
+                .background(Color(UIColor.systemBackground))
             }
-            .frame(height: 42)
-            .background(Color(UIColor.systemBackground))
             
             // TabView en bas
-            TabView(selection: $selectedTab) {
-                HomeView(hideHeader: $hideHeader)
-                    .tabItem { Image("homeIcon") }
-                    .tag(0)
-                
-                SpiraleView()
-                    .tabItem { Image("spiraleIcon") }
-                    .tag(1)
-                
-                if #available(iOS 16.0, *) {
-                    CreatePostView()
-                        .tabItem {
-                            Image("createpostIcon")
-                                .renderingMode(.template)
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(width: 50, height: 50)
-                        }
-                        .tag(2)
+            ZStack {
+                TabView(selection: $selectedTab) {
+                    HomeView(hideHeader: $hideHeader)
+                        .tabItem { Image("homeIcon") }
+                        .tag(0)
+                    
+                    SpiraleView()
+                        .tabItem { Image("spiraleIcon") }
+                        .tag(1)
+                    
+                    if #available(iOS 16.0, *) {
+                        CreatePostView()
+                            .tabItem {
+                                Image("createpostIcon")
+                                    .renderingMode(.template)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 50, height: 50)
+                            }
+                            .tag(2)
+                    }
+                    
+                    ChessView()
+                        .tabItem { Image("chessIcon") }
+                        .tag(3)
+                    
+                    ProfileView()
+                        .tabItem { Image("profileIcon") }
+                        .tag(4)
                 }
-                
-                ChessView()
-                    .tabItem { Image("chessIcon") }
-                    .tag(3)
-                
-                ProfileView()
-                    .tabItem { Image("profileIcon") }
-                    .tag(4)
             }
+            // Cache la TabBar quand hideHeader est true
+            .overlay(Color(UIColor.systemBackground).opacity(hideHeader ? 1 : 0))
         }
         .background(
             // NavigationLink invisible pour lancer SearchView

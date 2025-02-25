@@ -13,11 +13,16 @@ struct User: Identifiable, Codable {
     var authMethod: String?      // "Apple" ou "Email"
 }
 
-struct Post: Identifiable, Codable {
+struct Post: Identifiable, Codable, Equatable {
     var id: String = UUID().uuidString
     var authorId: String
     var imageUrl: String
     var timestamp: Date
+    
+    // Implémentation de Equatable
+    static func == (lhs: Post, rhs: Post) -> Bool {
+        return lhs.id == rhs.id
+    }
 }
 
 // MARK: - AppData
