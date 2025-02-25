@@ -5,50 +5,63 @@ struct PostDetailView: View {
     var posts: [Post]
     @Binding var selectedIndex: Int
     var onDismiss: () -> Void
+    @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
-        // La vue occupe tout l'espace disponible, mais sera placée sous le header et la tab bar.
         ZStack(alignment: .topLeading) {
-            // Affichage des images en mode paging
+            // Fond adaptatif au mode (clair/sombre)
+            Color(UIColor.systemBackground)
+                .ignoresSafeArea()
+            
+            // TabView en mode vertical
             TabView(selection: $selectedIndex) {
                 ForEach(0..<posts.count, id: \.self) { index in
                     if let url = URL(string: posts[index].imageUrl) {
-                        KFImage(url)
-                            .placeholder {
-                                ProgressView()
-                                    .frame(width: 80, height: 80)
-                            }
-                            .cancelOnDisappear(true)
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 80, height: 80)
-                            .clipShape(Circle())
-                        .tag(index)
-                        
+                        ZStack(alignment: .topLeading) {
+                            // Image plein écran
+                            KFImage(url)
+                                .placeholder {
+                                    ProgressView()
+                                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                }
+                                .cancelOnDisappear(true)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(maxWidth: .infinity)
+                                .tag(index)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
                 }
             }
-            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .always))
-            .edgesIgnoringSafeArea(.all)
+            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .automatic))
+            // Rotation pour défilement vertical
+            .rotationEffect(.degrees(-90))
+            .frame(
+                width: UIScreen.main.bounds.height,
+                height: UIScreen.main.bounds.width
+            )
+            .rotationEffect(.degrees(90), anchor: .topLeading)
+            .offset(x: UIScreen.main.bounds.width)
+            .ignoresSafeArea()
             
-            // Bouton de retour en haut à gauche
+            // Bouton de retour avec fond adaptatif
             Button(action: {
                 onDismiss()
             }) {
                 Image(systemName: "chevron.left")
-                    .foregroundColor(.white)
-                    .padding()
-                    .background(Color.black.opacity(0.5))
-                    .clipShape(Circle())
+                    .font(.title)
+                    .foregroundColor(.primary)
+                    .padding(12)
             }
             .padding(.leading, 16)
             .padding(.top, 16)
         }
-        // Geste de glissement vers la droite pour revenir
+        // Geste de balayage vers le bas pour fermer
         .gesture(
-            DragGesture(minimumDistance: 20)
+            DragGesture(minimumDistance: 50)
                 .onEnded { value in
-                    if value.translation.width > 100 {
+                    if value.translation.height > 100 {
                         onDismiss()
                     }
                 }

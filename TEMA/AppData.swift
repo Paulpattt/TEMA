@@ -34,30 +34,56 @@ class AppData: ObservableObject {
     @Published var posts: [Post] = []
     
     func getUser(for id: String, completion: @escaping (User?) -> Void) {
-            if let cachedUser = userCache[id] {
-                completion(cachedUser)
-            } else {
-                let db = Firestore.firestore()
-                db.collection("users").document(id).getDocument { document, error in
-                    if let document = document, document.exists, let data = document.data() {
-                        do {
-                            let jsonData = try JSONSerialization.data(withJSONObject: data)
-                            let fetchedUser = try JSONDecoder().decode(User.self, from: jsonData)
-                            DispatchQueue.main.async {
-                                self.userCache[id] = fetchedUser
-                            }
-                            completion(fetchedUser)
-                        } catch {
-                            print("Erreur de décodage: \(error.localizedDescription)")
-                            completion(nil)
-                        }
-                    } else {
-                        print("Erreur lors du chargement de l'utilisateur: \(error?.localizedDescription ?? "Document inexistant")")
-                        completion(nil)
+        // Check cache first
+        if let cachedUser = userCache[id] {
+            print("Utilisateur trouvé dans le cache: \(cachedUser.name)")
+            completion(cachedUser)
+            return
+        }
+        
+        // If not in cache, fetch from Firestore
+        let db = Firestore.firestore()
+        db.collection("users").document(id).getDocument { document, error in
+            if let error = error {
+                print("Erreur lors du chargement de l'utilisateur: \(error.localizedDescription)")
+                completion(nil)
+                return
+            }
+            
+            guard let document = document, document.exists else {
+                print("Document utilisateur introuvable pour l'ID: \(id)")
+                completion(nil)
+                return
+            }
+            
+            do {
+                // Try to decode the user data
+                if let data = document.data() {
+                    let user = User(
+                        id: id,
+                        name: data["name"] as? String ?? "Utilisateur",
+                        email: data["email"] as? String,
+                        profilePicture: data["profilePicture"] as? String,
+                        authMethod: data["authMethod"] as? String
+                    )
+                    
+                    // Update cache
+                    DispatchQueue.main.async {
+                        self.userCache[id] = user
                     }
+                    
+                    print("Utilisateur chargé depuis Firestore: \(user.name)")
+                    completion(user)
+                } else {
+                    print("Données utilisateur vides pour l'ID: \(id)")
+                    completion(nil)
                 }
+            } catch {
+                print("Erreur de décodage: \(error.localizedDescription)")
+                completion(nil)
             }
         }
+    }
     var db = Firestore.firestore()
     private var authStateListenerHandle: AuthStateDidChangeListenerHandle?
     
@@ -220,7 +246,7 @@ class AppData: ObservableObject {
     // MARK: - Upload d'image
     func uploadImage(_ image: UIImage, completion: @escaping (Result<String, Error>) -> Void) {
         guard let imageData = image.jpegData(compressionQuality: 0.8) else {
-            completion(.failure(NSError(domain: "AppData", code: -1, userInfo: [NSLocalizedDescriptionKey: "Impossible de convertir l’image"])))
+            completion(.failure(NSError(domain: "AppData", code: -1, userInfo: [NSLocalizedDescriptionKey: "Impossible de convertir l'image"])))
             return
         }
         

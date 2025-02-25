@@ -77,16 +77,25 @@ struct PostView: View {
             
             // Conteneur de hauteur fixe pour le nom
             ZStack(alignment: .leading) {
-                if showName, let user = author {
-                    Text(user.name)
-                        .font(.subheadline)
-                        .bold()
-                        .foregroundColor(textColor)
+                if showName {
+                    if let user = author {
+                        Text(user.name)
+                            .font(.subheadline)
+                            .bold()
+                            .foregroundColor(textColor)
+                    } else {
+                        Text("Chargement...")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                            .onAppear {
+                                loadAuthor()
+                            }
+                    }
                 }
             }
             .frame(height: 10)
             .padding(.horizontal, 6)
-            .padding(.top, 4)
+            .padding(.top, 2)
         }
         .onAppear {
             loadAuthor()
@@ -98,8 +107,12 @@ struct PostView: View {
             author = currentUser
         } else {
             appData.getUser(for: post.authorId) { fetchedUser in
-                DispatchQueue.main.async {
-                    self.author = fetchedUser
+                if let fetchedUser = fetchedUser {
+                    DispatchQueue.main.async {
+                        self.author = fetchedUser
+                    }
+                } else {
+                    print("Impossible de charger l'auteur pour le post: \(post.id)")
                 }
             }
         }
@@ -107,7 +120,7 @@ struct PostView: View {
     
     private func extractAndAdjustColor(from image: UIImage) -> UIColor {
         // Réduire la taille de l'image pour l'analyse
-        let size = CGSize(width: 50, height: 50)
+        let size = CGSize(width: 100, height: 100) // Augmenté pour plus de précision
         UIGraphicsBeginImageContext(size)
         image.draw(in: CGRect(origin: .zero, size: size))
         let scaledImage = UIGraphicsGetImageFromCurrentImageContext()
@@ -133,8 +146,8 @@ struct PostView: View {
         
         context.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
         
-        // Collecter les couleurs et leur fréquence
-        var colorFrequency: [String: (color: UIColor, count: Int, saturation: CGFloat)] = [:]
+        // Score pour chaque couleur en fonction de sa vivacité et son unicité
+        var colorScores: [UIColor: (score: Double, saturation: CGFloat, brightness: CGFloat)] = [:]
         
         for y in 0..<height {
             for x in 0..<width {
@@ -151,40 +164,67 @@ struct PostView: View {
                 
                 color.getHue(&hue, saturation: &saturation, brightness: &brightness, alpha: &alpha)
                 
-                // Ignorer les couleurs trop sombres ou trop claires
-                guard brightness > 0.1 && brightness < 0.9 else { continue }
+                // Ignorer les couleurs grisâtres, trop sombres ou trop claires
+                guard saturation > 0.2 && brightness > 0.2 && brightness < 0.95 else { continue }
                 
-                // Clé unique pour chaque couleur (arrondie pour regrouper les similaires)
-                let key = "\(Int(hue * 30))-\(Int(saturation * 10))-\(Int(brightness * 10))"
+                // Calcul du score: on privilégie les couleurs saturées et de luminosité moyenne
+                let saturationScore = saturation * 2.0 // On donne plus d'importance à la saturation
+                let brightnessScore = 1.0 - abs(brightness - 0.6) * 2.0 // Optimum à 0.6 de luminosité
                 
-                if let existing = colorFrequency[key] {
-                    colorFrequency[key] = (color, existing.count + 1, saturation)
+                // Bonus pour les couleurs spécifiques (oranges pour les flammes, bleus pour la mer)
+                var thematicBonus: Double = 0.0
+                
+                // Orange/Rouge (flammes) - hue entre 0.0 et 0.1 ou 0.95-1.0
+                if (hue < 0.1 || hue > 0.95) && saturation > 0.5 {
+                    thematicBonus += 1.0
+                }
+                
+                // Bleu (mer/ciel) - hue entre 0.5 et 0.7
+                if hue > 0.5 && hue < 0.7 && saturation > 0.5 {
+                    thematicBonus += 0.7
+                }
+                
+                let score = saturationScore + brightnessScore + thematicBonus
+                
+                // On arrondit les couleurs similaires
+                let roundedColor = UIColor(hue: round(hue * 20) / 20,
+                                         saturation: round(saturation * 10) / 10,
+                                         brightness: round(brightness * 10) / 10,
+                                         alpha: 1.0)
+                
+                if let existing = colorScores[roundedColor] {
+                    colorScores[roundedColor] = (existing.score + score, max(existing.saturation, saturation), existing.brightness)
                 } else {
-                    colorFrequency[key] = (color, 1, saturation)
+                    colorScores[roundedColor] = (score, saturation, brightness)
                 }
             }
         }
         
-        // Trouver la couleur dominante la plus vibrante
-        let dominantColor = colorFrequency
-            .sorted { $0.value.count > $1.value.count } // D'abord par fréquence
-            .prefix(5) // Prendre les 5 plus fréquentes
-            .max { $0.value.saturation < $1.value.saturation }? // Choisir la plus saturée
-            .value.color ?? .label
+        // Trouver la couleur avec le meilleur score
+        let bestColor = colorScores.max { $0.value.score < $1.value.score }?.key ?? .label
         
-        // Ajuster la luminosité pour le mode
+        // Ajuster la vivacité de la couleur
         var h: CGFloat = 0, s: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
-        dominantColor.getHue(&h, saturation: &s, brightness: &b, alpha: &a)
+        bestColor.getHue(&h, saturation: &s, brightness: &b, alpha: &a)
+        
+        // Augmenter la saturation pour des couleurs plus vives
+        s = min(s * 1.8, 1.0) // Augmente encore plus la saturation
         
         if colorScheme == .dark {
-            b = min(max(b * 1.3, 0.6), 0.8)
-            s = min(s * 1.1, 0.9)
+            // En mode sombre, on garde une luminosité élevée
+            b = min(max(b, 0.8), 0.95)
         } else {
-            b = min(max(b * 0.7, 0.3), 0.5)
-            s = min(s * 0.9, 0.8)
+            // En mode clair, luminosité moyenne-basse pour contraste
+            b = min(max(b * 0.7, 0.5), 0.7)
         }
         
-        return UIColor(hue: h, saturation: s, brightness: b, alpha: 1.0)
+        // Créer une couleur plus vibrante
+        let vibrantColor = UIColor(hue: h,
+                                 saturation: s,
+                                 brightness: b,
+                                 alpha: 1.0)
+        
+        return vibrantColor
     }
 }
 
