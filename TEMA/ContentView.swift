@@ -50,105 +50,173 @@ struct ContentView: View {
     
     // Le contenu principal de l'app : header + TabView
     private var mainContent: some View {
-        VStack(spacing: 0) {
-            // Header conditionnel
-            if !hideHeader {
-                GeometryReader { geometry in
-                    HStack {
-                        // Bouton TEMA : ramène à l'onglet Home
-                        Button(action: {
-                            selectedTab = 0
-                        }) {
-                            Text("TEMA")
-                                .font(.largeTitle)
-                                .bold()
-                                .foregroundColor(Color("TEMA_Red"))
-                        }
-                        // Décale le logo TEMA vers la droite
-                        .padding(.leading, 12)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        
-                        Spacer()
-                        
-                        // Barre de recherche
-                        HStack(spacing: 8) {
-                            Image(systemName: "magnifyingglass")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 20, height: 20)
-                                .foregroundColor(.primary)
-                            
-                            TextField("", text: $searchText, onCommit: {
-                                if !searchText.isEmpty {
-                                    isSearchActive = true
-                                }
-                            })
-                            .textFieldStyle(PlainTextFieldStyle())
-                            .foregroundColor(.primary)
-                            .frame(height: 34)
-                            .overlay(
-                                Rectangle()
-                                    .frame(height: 2)
-                                    .foregroundColor(.gray)
-                                    .offset(y: -5),
-                                alignment: .bottom
-                            )
-                        }
-                        .frame(width: geometry.size.width / 2, alignment: .trailing)
-                    }
-                    // On peut conserver un padding à droite pour équilibrer
-                    .padding(.trailing, 16)
-                    .frame(height: geometry.size.height)
+        ZStack {
+            // Background tap area to dismiss keyboard
+            Color.clear
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                 }
-                .frame(height: 55)
-                .background(Color(UIColor.systemBackground))
-            }
-            
-            // TabView en bas
-            ZStack {
-                TabView(selection: $selectedTab) {
-                    HomeView(hideHeader: $hideHeader)
-                        .tabItem { Image("homeIcon") }
-                        .tag(0)
-                    
-                    SpiraleView()
-                        .tabItem { Image("spiraleIcon") }
-                        .tag(1)
-                    
-                    if #available(iOS 16.0, *) {
-                        CreatePostView()
-                            .tabItem {
-                                Image("createpostIcon")
-                                    .renderingMode(.template)
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
-                                    .frame(width: 50, height: 50)
+                // Swipe down gesture to dismiss keyboard
+                .gesture(
+                    DragGesture(minimumDistance: 20)
+                        .onEnded { value in
+                            // Check if it's a downward swipe
+                            if value.translation.height > 0 && abs(value.translation.width) < abs(value.translation.height) {
+                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                             }
-                            .tag(2)
+                        }
+                )
+            
+            VStack(spacing: 0) {
+                // Header conditionnel
+                if !hideHeader {
+                    GeometryReader { geometry in
+                        HStack {
+                            // Bouton TEMA : ramène à l'onglet Home
+                            Button(action: {
+                                selectedTab = 0
+                            }) {
+                                Text("TEMA")
+                                    .font(.largeTitle)
+                                    .bold()
+                                    .foregroundColor(Color("TEMA_Red"))
+                            }
+                            // Décale le logo TEMA vers la droite
+                            .padding(.leading, 12)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            
+                            Spacer()
+                            
+                            // Barre de recherche avec loupe cliquable
+                            HStack(spacing: 8) {
+                                // Loupe transformée en bouton
+                                Button(action: {
+                                    if !searchText.isEmpty {
+                                        isSearchActive = true
+                                    } else {
+                                        focusSearchField()
+                                    }
+                                }) {
+                                    Image(systemName: "magnifyingglass")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 20, height: 20)
+                                        .foregroundColor(.primary)
+                                }
+                                .padding(.horizontal, 5)
+                                
+                                TextField("", text: $searchText, onCommit: {
+                                    if !searchText.isEmpty {
+                                        isSearchActive = true
+                                    }
+                                })
+                                .placeholder(when: searchText.isEmpty) {
+                                    Text("Rechercher un utilisateur")
+                                        .foregroundColor(.gray)
+                                }
+                                .textFieldStyle(PlainTextFieldStyle())
+                                .foregroundColor(.primary)
+                                .frame(height: 34)
+                                .overlay(
+                                    Rectangle()
+                                        .frame(height: 2)
+                                        .foregroundColor(.gray)
+                                        .offset(y: -5),
+                                    alignment: .bottom
+                                )
+                            }
+                            .contentShape(Rectangle())
+                            .frame(width: geometry.size.width / 2, alignment: .trailing)
+                            .padding(.vertical, 5)
+                            .onTapGesture {
+                                focusSearchField()
+                            }
+                        }
+                        // On peut conserver un padding à droite pour équilibrer
+                        .padding(.trailing, 16)
+                        .frame(height: geometry.size.height)
                     }
-                    
-                    ChessView()
-                        .tabItem { Image("chessIcon") }
-                        .tag(3)
-                    
-                    ProfileView()
-                        .tabItem { Image("profileIcon") }
-                        .tag(4)
+                    .frame(height: 55)
+                    .background(Color(UIColor.systemBackground))
                 }
+                
+                // TabView en bas
+                ZStack {
+                    TabView(selection: $selectedTab) {
+                        HomeView(hideHeader: $hideHeader)
+                            .tabItem { Image("homeIcon") }
+                            .tag(0)
+                        
+                        SpiraleView()
+                            .tabItem { Image("spiraleIcon") }
+                            .tag(1)
+                        
+                        if #available(iOS 16.0, *) {
+                            CreatePostView()
+                                .tabItem {
+                                    Image("createpostIcon")
+                                        .renderingMode(.template)
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .frame(width: 50, height: 50)
+                                }
+                                .tag(2)
+                        }
+                        
+                        ChessView()
+                            .tabItem { Image("chessIcon") }
+                            .tag(3)
+                        
+                        ProfileView()
+                            .tabItem { Image("profileIcon") }
+                            .tag(4)
+                    }
+                    .padding(.bottom, -5)
+                }
+                // Cache la TabBar quand hideHeader est true
+                .overlay(Color(UIColor.systemBackground).opacity(hideHeader ? 1 : 0))
             }
-            // Cache la TabBar quand hideHeader est true
-            .overlay(Color(UIColor.systemBackground).opacity(hideHeader ? 1 : 0))
         }
-        .background(
-            // NavigationLink invisible pour lancer SearchView
-            NavigationLink(
-                destination: SearchView(searchQuery: searchText)
-                    .environmentObject(appData),
-                isActive: $isSearchActive,
-                label: { EmptyView() }
-            )
-        )
+        // Remplacer le NavigationLink par fullScreenCover
+        .fullScreenCover(isPresented: $isSearchActive) {
+            NavigationView {
+                SearchView(searchQuery: searchText)
+                    .environmentObject(appData)
+            }
+        }
         .navigationBarHidden(true)
+    }
+    
+    // Fonction pour mettre le focus sur le champ de recherche
+    private func focusSearchField() {
+        let keyWindow = UIApplication.shared.connectedScenes
+            .filter({$0.activationState == .foregroundActive})
+            .compactMap({$0 as? UIWindowScene})
+            .first?.windows
+            .filter({$0.isKeyWindow}).first
+        
+        keyWindow?.endEditing(false)
+        
+        // Small delay to ensure the keyboard appears
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            let textFields = keyWindow?.subviews.flatMap { $0.subviews.flatMap { $0.subviews } }.compactMap { $0 as? UITextField }
+            textFields?.first?.becomeFirstResponder()
+        }
+    }
+}
+
+// Extension pour ajouter un placeholder au TextField
+extension View {
+    func placeholder<Content: View>(
+        when shouldShow: Bool,
+        alignment: Alignment = .leading,
+        @ViewBuilder placeholder: () -> Content) -> some View {
+        
+        ZStack(alignment: alignment) {
+            placeholder().opacity(shouldShow ? 1 : 0)
+            self
+        }
     }
 }
 

@@ -362,4 +362,52 @@ class AppData: ObservableObject {
             self.currentUser = user
         }
     }
+    
+    // MARK: - Recherche d'utilisateurs
+    func searchUsers(query: String, completion: @escaping ([User]) -> Void) {
+        guard !query.isEmpty else {
+            completion([])
+            return
+        }
+        
+        let searchQuery = query.lowercased()
+        
+        // Préparer la requête Firestore
+        let db = Firestore.firestore()
+        db.collection("users")
+            .whereField("searchName", isGreaterThanOrEqualTo: searchQuery)
+            .whereField("searchName", isLessThanOrEqualTo: searchQuery + "\u{f8ff}")
+            .limit(to: 20)
+            .getDocuments { snapshot, error in
+                if let error = error {
+                    print("Erreur lors de la recherche d'utilisateurs: \(error.localizedDescription)")
+                    completion([])
+                    return
+                }
+                
+                guard let documents = snapshot?.documents else {
+                    completion([])
+                    return
+                }
+                
+                let users = documents.compactMap { document -> User? in
+                    let data = document.data()
+                    
+                    return User(
+                        id: document.documentID,
+                        name: data["name"] as? String ?? "Utilisateur",
+                        email: data["email"] as? String,
+                        profilePicture: data["profilePicture"] as? String,
+                        authMethod: data["authMethod"] as? String
+                    )
+                }
+                
+                // Mettre à jour le cache pour ces utilisateurs
+                for user in users {
+                    self.userCache[user.id] = user
+                }
+                
+                completion(users)
+            }
+    }
 }

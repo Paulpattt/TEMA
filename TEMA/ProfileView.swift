@@ -153,39 +153,38 @@ struct ProfileView: View {
             .opacity(isFullscreen ? 0 : 1)
             
             // Vue plein écran
-            if isFullscreen, let selectedIdx = selectedIndex, selectedIdx < profilePosts.count {
+            if isFullscreen, let selectedIdx = selectedIndex {
                 Color(UIColor.systemBackground)
                     .ignoresSafeArea()
                 
-                // Image agrandie
-                KFImage(URL(string: profilePosts[selectedIdx].imageUrl)!)
-                    .placeholder {
-                        ProgressView()
+                TabView(selection: $selectedIndex) {
+                    ForEach(Array(profilePosts.enumerated()), id: \.offset) { index, post in
+                        if let url = URL(string: post.imageUrl) {
+                            KFImage(url)
+                                .placeholder {
+                                    ProgressView()
+                                }
+                                .cancelOnDisappear(true)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                .tag(index)
+                        }
                     }
-                    .resizable()
-                    .scaledToFit()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .matchedGeometryEffect(id: "image-\(selectedIdx)", in: animation)
-                    .gesture(
-                        // Geste de balayage vertical pour naviguer entre les images
-                        DragGesture(minimumDistance: 50)
-                            .onEnded { value in
-                                if abs(value.translation.height) > 100 {
-                                    if value.translation.height > 0 && selectedIdx > 0 {
-                                        // Swipe vers le bas -> image précédente
-                                        selectedIndex = selectedIdx - 1
-                                    } else if value.translation.height < 0 && selectedIdx < profilePosts.count - 1 {
-                                        // Swipe vers le haut -> image suivante
-                                        selectedIndex = selectedIdx + 1
-                                    }
-                                } else if abs(value.translation.width) > 100 {
-                                    // Swipe horizontal -> fermeture
-                                    withAnimation(.spring()) {
-                                        isFullscreen = false
-                                    }
+                }
+                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+                .ignoresSafeArea()
+                .gesture(
+                    DragGesture()
+                        .onEnded { value in
+                            // Fermeture si glissement vertical
+                            if abs(value.translation.height) > 100 && abs(value.translation.height) > abs(value.translation.width) {
+                                withAnimation(.spring()) {
+                                    isFullscreen = false
                                 }
                             }
-                    )
+                        }
+                )
                 
                 // Bouton de fermeture
                 VStack {

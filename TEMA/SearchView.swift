@@ -1,55 +1,130 @@
 import SwiftUI
-import FirebaseFirestore
+import Kingfisher
 
 struct SearchView: View {
-    var searchQuery: String
-    @State private var results: [User] = []
     @EnvironmentObject var appData: AppData
+    @Environment(\.dismiss) var dismiss
+    
+    @State var searchQuery: String
+    @State private var searchResults: [User] = []
+    @State private var isSearching: Bool = false
     
     var body: some View {
-        VStack {
-            Text("Résultats pour : \(searchQuery)")
-                .font(.headline)
-                .padding()
+        VStack(spacing: 0) {
+            // Barre de recherche
+            HStack {
+                Button(action: {
+                    dismiss()
+                }) {
+                    Image(systemName: "chevron.left")
+                        .font(.title2)
+                        .foregroundColor(.primary)
+                        .padding(8)
+                        .background(Color.secondary.opacity(0.1))
+                        .cornerRadius(8)
+                }
+                
+                TextField("Rechercher", text: $searchQuery, onCommit: {
+                    performSearch()
+                })
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .autocapitalization(.none)
+                .disableAutocorrection(true)
+                
+                Button(action: {
+                    performSearch()
+                }) {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundColor(.primary)
+                        .padding(8)
+                        .background(Color.secondary.opacity(0.1))
+                        .cornerRadius(8)
+                }
+            }
+            .padding()
             
-            if results.isEmpty && !searchQuery.isEmpty {
-                Text("Aucun résultat trouvé")
-                    .foregroundColor(.gray)
+            if isSearching {
+                ProgressView()
                     .padding()
+            } else if searchResults.isEmpty && !searchQuery.isEmpty {
+                VStack(spacing: 20) {
+                    Image(systemName: "person.slash")
+                        .font(.system(size: 50))
+                        .foregroundColor(.gray)
+                    
+                    Text("Aucun utilisateur trouvé")
+                        .font(.headline)
+                        .foregroundColor(.gray)
+                    
+                    Text("Essayez un autre terme de recherche")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                }
+                .padding(.top, 100)
+                .frame(maxWidth: .infinity)
             } else {
-                List(results) { user in
-                    NavigationLink(destination: UserProfileView(user: user)
-                                    .environmentObject(appData)) {
-                        VStack(alignment: .leading) {
-                            Text(user.name)
-                                .font(.body)
-                            if let email = user.email {
-                                Text(email)
-                                    .font(.subheadline)
-                                    .foregroundColor(.gray)
+                List {
+                    ForEach(searchResults) { user in
+                        NavigationLink(destination: UserProfileView(user: user)) {
+                            HStack(spacing: 15) {
+                                // Photo de profil
+                                if let profilePicture = user.profilePicture, 
+                                   !profilePicture.isEmpty,
+                                   let url = URL(string: profilePicture) {
+                                    KFImage(url)
+                                        .placeholder {
+                                            ProgressView()
+                                        }
+                                        .cancelOnDisappear(true)
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: 50, height: 50)
+                                        .clipShape(Circle())
+                                } else {
+                                    Image(systemName: "person.crop.circle")
+                                        .resizable()
+                                        .frame(width: 50, height: 50)
+                                        .foregroundColor(.gray)
+                                }
+                                
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text(user.name)
+                                        .font(.headline)
+                                    
+                                    if user.id == appData.currentUser?.id {
+                                        Text("Votre compte")
+                                            .font(.subheadline)
+                                            .foregroundColor(.gray)
+                                    }
+                                }
                             }
+                            .padding(.vertical, 5)
                         }
                     }
                 }
+                .listStyle(PlainListStyle())
             }
         }
+        .navigationBarHidden(true)
         .onAppear {
-            searchUsers()
+            if !searchQuery.isEmpty {
+                performSearch()
+            }
         }
-        .navigationTitle("Recherche")
     }
     
-    func searchUsers() {
-        let lowerQuery = searchQuery.lowercased()
-        let query = appData.db.collection("users")
-            .whereField("searchName", isGreaterThanOrEqualTo: lowerQuery)
-            .whereField("searchName", isLessThan: lowerQuery + "\u{f8ff}")
-        query.getDocuments { snapshot, error in
-            if let error = error {
-                print("Erreur de recherche : \(error.localizedDescription)")
-                results = []
-            } else {
-                results = snapshot?.documents.compactMap { try? $0.data(as: User.self) } ?? []
+    private func performSearch() {
+        guard !searchQuery.isEmpty else {
+            searchResults = []
+            return
+        }
+        
+        isSearching = true
+        
+        appData.searchUsers(query: searchQuery) { results in
+            DispatchQueue.main.async {
+                self.searchResults = results
+                self.isSearching = false
             }
         }
     }
@@ -57,7 +132,7 @@ struct SearchView: View {
 
 #Preview {
     NavigationView {
-        SearchView(searchQuery: "paulpaturel")
+        SearchView(searchQuery: "test")
             .environmentObject(AppData())
     }
 }

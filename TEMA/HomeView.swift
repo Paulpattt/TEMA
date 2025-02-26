@@ -5,33 +5,23 @@ import FirebaseFirestore
 struct HomeView: View {
     @EnvironmentObject var appData: AppData
     @Binding var hideHeader: Bool
-    @State private var showUserNames: Bool = true // Pour contrôler l'affichage des noms
     
     var body: some View {
-        NavigationView {
-            ScrollView {
-                VStack(spacing: 50) {
-                    ForEach(appData.posts.sorted(by: { $0.timestamp > $1.timestamp })) { post in
-                        PostView(post: post, showName: showUserNames)
-                            .background(Color.clear)
-                            .onTapGesture {
-                                withAnimation(.easeInOut(duration: 0.3)) {
-                                    showUserNames.toggle()
-                                }
-                            }
-                    }
+        ScrollView(.vertical, showsIndicators: false) {
+            VStack(spacing: 30) {
+                ForEach(appData.posts.sorted(by: { $0.timestamp > $1.timestamp })) { post in
+                    PostView(post: post)
+                        .background(Color.clear)
                 }
-                .padding(.vertical)
             }
-            .background(Color.clear)
-            .navigationBarHidden(true)
+            .padding(.vertical)
         }
+        .background(Color.clear)
     }
 }
 
 struct PostView: View {
     var post: Post
-    var showName: Bool
     @EnvironmentObject var appData: AppData
     @State private var author: User? = nil
     @State private var textColor: Color = .primary
@@ -75,25 +65,25 @@ struct PostView: View {
                     .frame(height: 200)
             }
             
-            // Conteneur de hauteur fixe pour le nom
+            // Conteneur pour le nom (toujours affiché)
             ZStack(alignment: .leading) {
-                if showName {
-                    if let user = author {
+                if let user = author {
+                    NavigationLink(destination: UserProfileView(user: user)) {
                         Text(user.name)
                             .font(.subheadline)
                             .bold()
                             .foregroundColor(textColor)
-                    } else {
-                        Text("Chargement...")
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
-                            .onAppear {
-                                loadAuthor()
-                            }
                     }
+                } else {
+                    Text("Chargement...")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                        .onAppear {
+                            loadAuthor()
+                        }
                 }
             }
-            .frame(height: 10)
+            .frame(height: 20)
             .padding(.horizontal, 6)
             .padding(.top, 2)
         }
