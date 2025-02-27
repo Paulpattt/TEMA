@@ -42,7 +42,7 @@ struct UserProfileView: View {
                                 .resizable()
                                 .scaledToFill()
                                 .frame(width: 80, height: 80)
-                                .clipShape(Circle())
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
                                 .onAppear {
                                     extractColor(from: url)
                                 }
@@ -51,6 +51,7 @@ struct UserProfileView: View {
                                 .resizable()
                                 .frame(width: 80, height: 80)
                                 .foregroundColor(.gray)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
                         }
                         
                         Spacer()
