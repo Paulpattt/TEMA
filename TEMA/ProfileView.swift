@@ -37,13 +37,13 @@ struct ProfileView: View {
                         // Utiliser AvatarView au lieu de KFImage
                         AvatarView(
                             profileUrl: appData.currentUser?.profilePicture,
-                            size: 85,
+                            size: 90,
                             defaultSymbol: "person.fill",
                             defaultColor: .gray
                         )
                     }
                     .contentShape(Rectangle())
-                    .offset(x: -4, y: 3) // Shifted slightly left and maintaining upward adjustment
+                    .offset(x: -4, y: -2) // Ajusté pour que l'avatar ne soit pas caché par le header principal
                     
                     Spacer()
                     
