@@ -39,21 +39,23 @@ struct ProfileAvatarPickerView: View {
     @State private var errorMessage: String? = nil
     @State private var showColorPicker = false // Désactivé car nous utilisons des images en couleur
     
-    // Configuration de la grille
+    // Configuration de la grille - modifiée pour avoir exactement 3 colonnes
     private let columns = [
-        GridItem(.adaptive(minimum: 110, maximum: 120), spacing: 15)
+        GridItem(.flexible(), spacing: 12),
+        GridItem(.flexible(), spacing: 12),
+        GridItem(.flexible(), spacing: 12)
     ]
-    
+
     var body: some View {
         NavigationView {
             ZStack {
                 // Contenu principal
-                VStack {
+            VStack {
                     if isLoading {
                         // Indicateur de chargement
                         ProgressView("Chargement des avatars disponibles...")
-                            .padding()
-                    } else {
+                        .padding()
+                } else {
                         // Titre avec instructions
                         VStack(spacing: 16) {
                             // Message d'explication
@@ -64,7 +66,7 @@ struct ProfileAvatarPickerView: View {
                             
                             Text("Chaque avatar ne peut être utilisé que par une seule personne.")
                                 .font(.subheadline)
-                                .foregroundColor(.gray)
+                        .foregroundColor(.gray)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding(.horizontal)
                         }
@@ -300,11 +302,11 @@ struct AvatarCell: View {
     @State private var imageExists: Bool = false
     @State private var imageName: String = ""
     
-    // Dimensions de la cellule
-    private let cellWidth: CGFloat = 110  // Augmenté pour éviter le chevauchement
-    private let cellHeight: CGFloat = 90  // Légèrement plus petite que la largeur
-    private let imageWidth: CGFloat = 100 // Taille de l'image à l'intérieur
-    private let imageHeight: CGFloat = 85 // Taille de l'image à l'intérieur
+    // Dimensions de la cellule - réduites pour 3 par ligne
+    private let cellWidth: CGFloat = 95
+    private let cellHeight: CGFloat = 80
+    private let imageWidth: CGFloat = 85
+    private let imageHeight: CGFloat = 75
     
     var body: some View {
         ZStack {
@@ -317,29 +319,25 @@ struct AvatarCell: View {
                             .resizable()
                             .scaledToFit()
                             .frame(width: imageWidth, height: imageHeight)
-                            .opacity(isAvailable ? 1.0 : 0.3)
+                            .opacity(isAvailable ? 1.0 : 0.4)
                         
-                        // Verification de chargement (pour debug uniquement, à supprimer plus tard)
-                        Text("✓")
-                            .font(.caption2)
-                            .foregroundColor(.green)
-                            .position(x: 15, y: 70)
-                            .opacity(0.7) // Semi-transparent
+                        // Tick vert supprimé
                     } else {
                         // Afficher un texte de débogage si l'image n'existe pas
                         VStack {
                             Text(systemName)
-                                .font(.caption)
+                                .font(.caption2) // Réduit la taille du texte
                                 .foregroundColor(.gray)
                             
                             Image(systemName: "exclamationmark.triangle")
                                 .foregroundColor(.orange)
+                                .font(.caption)
                             
                             Text("Not found")
                                 .font(.caption2)
                                 .foregroundColor(.red)
                         }
-                        .padding(4)
+                        .padding(2) // Réduit le padding
                         .frame(width: imageWidth, height: imageHeight)
                     }
                 }
@@ -352,17 +350,17 @@ struct AvatarCell: View {
                 // Fallback sur SF Symbol si l'image n'existe pas
                 Rectangle()
                     .fill(color.opacity(0.15))
-                    .frame(width: 80, height: 80)
+                    .frame(width: 70, height: 70) // Réduit les dimensions
                     .cornerRadius(8)
                 
                 Image(systemName: "person.fill")
                     .resizable()
                     .renderingMode(.template)
                     .scaledToFit()
-                    .padding(16)
+                    .padding(14) // Réduit le padding
                     .foregroundColor(color)
-                    .frame(width: 80, height: 80)
-                    .opacity(isAvailable ? 1.0 : 0.3)
+                    .frame(width: 70, height: 70) // Réduit les dimensions
+                    .opacity(isAvailable ? 1.0 : 0.4)
             }
             
             // Bordure de sélection
@@ -375,25 +373,25 @@ struct AvatarCell: View {
             // Indicateur "Actuel"
             if isCurrent {
                 Text("Actuel")
-                    .font(.caption)
+                    .font(.caption2) // Réduit la taille du texte
                     .foregroundColor(.white)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
+                    .padding(.horizontal, 4) // Réduit le padding
+                    .padding(.vertical, 1) // Réduit le padding
                     .background(Color.blue)
                     .cornerRadius(4)
-                    .position(x: 40, y: 15) // Position légèrement décalée vers le bas
+                    .position(x: 35, y: 12) // Ajusté pour la nouvelle taille
             }
             
-            // Indicateur "Non disponible"
+            // Indicateur "Non disponible" - on garde ce texte pour être sûr que c'est clair
             if !isAvailable {
                 Text("Pris")
-                    .font(.caption)
+                    .font(.caption2) // Réduit la taille du texte
                     .foregroundColor(.white)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
+                    .padding(.horizontal, 4) // Réduit le padding
+                    .padding(.vertical, 1) // Réduit le padding
                     .background(Color.red)
                     .cornerRadius(4)
-                    .position(x: 40, y: 15) // Position légèrement décalée vers le bas
+                    .position(x: 35, y: 12) // Ajusté pour la nouvelle taille
             }
         }
         .frame(width: cellWidth, height: cellHeight)
