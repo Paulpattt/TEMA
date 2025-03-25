@@ -14,9 +14,13 @@ struct ProfileAvatarPickerView: View {
     
     // Liste des avatars personnalisés (mise à jour pour correspondre aux noms réels d'assets)
     private let avatarNames = [
-        "avatar1", "avatar_02", "avatar_03", "avatar_04", "avatar_05",
-        "avatar_06", "avatar_07", "avatar_08", "avatar_09", "avatar_10",
-        "avatar_11", "avatar_12", "avatar_13", "avatar_14", "avatar_15"
+        "avatar1", "avatar2", "avatar3", "avatar4", "avatar5",
+        "avatar6", "avatar7", "avatar8", "avatar9", "avatar10",
+        "avatar11", "avatar12", "avatar13", "avatar14", "avatar15",
+        "avatar16", "avatar17", "avatar18", "avatar19", "avatar20",
+        "avatar21", "avatar22", "avatar23", "avatar24", "avatar25",
+        "avatar26", "avatar27", "avatar28", "avatar29", "avatar30",
+        "avatar31", "avatar_02", "avatar33", "avatar34"
     ]
     
     // Couleurs disponibles pour les avatars (optionnel si vos images ont déjà leurs propres couleurs)
