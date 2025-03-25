@@ -37,12 +37,13 @@ struct ProfileView: View {
                         // Utiliser AvatarView au lieu de KFImage
                         AvatarView(
                             profileUrl: appData.currentUser?.profilePicture,
-                            size: 70,
+                            size: 85,
                             defaultSymbol: "person.fill",
                             defaultColor: .gray
                         )
                     }
                     .contentShape(Rectangle())
+                    .offset(x: -4, y: 3) // Shifted slightly left and maintaining upward adjustment
                     
                     Spacer()
                     
@@ -53,11 +54,12 @@ struct ProfileView: View {
                             .bold()
                             .foregroundColor(.primary)
                     }
+                    .offset(y: 20) // Significantly increased vertical offset to move username much lower
                 }
                 .padding(.horizontal)
                 .padding(.top, 10)
                 .padding(.bottom, 10)
-                .frame(height: 90)
+                .frame(height: 90) // Reverting to the original frame height
                 
                 Divider()
                 
