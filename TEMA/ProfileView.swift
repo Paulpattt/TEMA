@@ -34,27 +34,15 @@ struct ProfileView: View {
                     Button(action: {
                         showEditProfilePicture = true
                     }) {
-                        if let profilePictureURL = appData.currentUser?.profilePicture,
-                           !profilePictureURL.isEmpty,
-                           let url = URL(string: profilePictureURL) {
-                            KFImage(url)
-                                .placeholder {
-                                    ProgressView()
-                                        .frame(width: 80, height: 80)
-                                }
-                                .cancelOnDisappear(true)
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: 80, height: 80)
-                                .clipShape(Circle())
-                        } else {
-                            Image(systemName: "person.crop.circle")
-                                .resizable()
-                                .frame(width: 80, height: 80)
-                                .foregroundColor(.gray)
-                        }
+                        // Utiliser AvatarView au lieu de KFImage
+                        AvatarView(
+                            profileUrl: appData.currentUser?.profilePicture,
+                            size: 70,
+                            defaultSymbol: "person.fill",
+                            defaultColor: .gray
+                        )
                     }
-                    .contentShape(Circle())
+                    .contentShape(Rectangle())
                     
                     Spacer()
                     
@@ -66,8 +54,10 @@ struct ProfileView: View {
                             .foregroundColor(.primary)
                     }
                 }
-                .padding()
-                .frame(height: 75)
+                .padding(.horizontal)
+                .padding(.top, 10)
+                .padding(.bottom, 10)
+                .frame(height: 90)
                 
                 Divider()
                 
@@ -211,9 +201,9 @@ struct ProfileView: View {
         .navigationBarHidden(true)
         .sheet(isPresented: $showEditProfilePicture) {
             if #available(iOS 16.0, *) {
-                EditProfilePictureView().environmentObject(appData)
+                ProfileAvatarPickerView().environmentObject(appData)
             } else {
-                Text("La modification de la photo n'est pas disponible sur cette version")
+                Text("La modification de l'avatar n'est pas disponible sur cette version")
             }
         }
     }

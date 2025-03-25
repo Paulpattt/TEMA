@@ -8,107 +8,152 @@ struct SearchView: View {
     @State var searchQuery: String
     @State private var searchResults: [User] = []
     @State private var isSearching: Bool = false
+    @State private var offset: CGFloat = 0
     
     var body: some View {
-        VStack(spacing: 0) {
-            // Barre de recherche
-            HStack {
-                Button(action: {
-                    dismiss()
-                }) {
-                    Image(systemName: "chevron.left")
-                        .font(.title2)
-                        .foregroundColor(.primary)
-                        .padding(8)
-                        .background(Color.secondary.opacity(0.1))
-                        .cornerRadius(8)
+        GeometryReader { geometry in
+            VStack(spacing: 0) {
+                // Barre de recherche
+                HStack {
+                    // Bouton retour simple
+                    Button(action: {
+                        dismiss()
+                    }) {
+                        Image(systemName: "chevron.left")
+                            .font(.title2)
+                            .foregroundColor(Color("TEMA_Red"))
+                            .padding(8)
+                    }
+                    
+                    TextField("Rechercher", text: $searchQuery, onCommit: {
+                        performSearch()
+                    })
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .autocapitalization(.none)
+                    .disableAutocorrection(true)
+                    
+                    Button(action: {
+                        performSearch()
+                    }) {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundColor(.primary)
+                            .padding(8)
+                            .background(Color.secondary.opacity(0.1))
+                            .cornerRadius(8)
+                    }
                 }
+                .padding()
                 
-                TextField("Rechercher", text: $searchQuery, onCommit: {
-                    performSearch()
-                })
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .autocapitalization(.none)
-                .disableAutocorrection(true)
-                
-                Button(action: {
-                    performSearch()
-                }) {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundColor(.primary)
-                        .padding(8)
-                        .background(Color.secondary.opacity(0.1))
-                        .cornerRadius(8)
+                if isSearching {
+                    ProgressView()
+                        .padding()
+                } else if searchResults.isEmpty && !searchQuery.isEmpty {
+                    VStack(spacing: 20) {
+                        Image(systemName: "person.slash")
+                            .font(.system(size: 50))
+                            .foregroundColor(.gray)
+                        
+                        Text("Aucun utilisateur trouvé")
+                            .font(.headline)
+                            .foregroundColor(.gray)
+                        
+                        Text("Essayez un autre terme de recherche")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                    }
+                    .padding(.top, 100)
+                    .frame(maxWidth: .infinity)
+                } else {
+                    List {
+                        ForEach(searchResults) { user in
+                            NavigationLink(destination: 
+                                UserProfileView(user: user)
+                                    .navigationBarTitle(user.name, displayMode: .inline)
+                            ) {
+                                HStack(spacing: 15) {
+                                    // Utiliser AvatarView au lieu de KFImage
+                                    AvatarView(
+                                        profileUrl: user.profilePicture,
+                                        size: 50,
+                                        isCircular: true,
+                                        defaultSymbol: "person.crop.circle",
+                                        defaultColor: .gray
+                                    )
+                                    
+                                    VStack(alignment: .leading, spacing: 3) {
+                                        Text(user.name)
+                                            .font(.headline)
+                                        
+                                        if user.id == appData.currentUser?.id {
+                                            Text("Votre compte")
+                                                .font(.subheadline)
+                                                .foregroundColor(.gray)
+                                        }
+                                    }
+                                }
+                                .padding(.vertical, 5)
+                            }
+                        }
+                    }
+                    .listStyle(PlainListStyle())
                 }
             }
-            .padding()
-            
-            if isSearching {
-                ProgressView()
-                    .padding()
-            } else if searchResults.isEmpty && !searchQuery.isEmpty {
-                VStack(spacing: 20) {
-                    Image(systemName: "person.slash")
-                        .font(.system(size: 50))
-                        .foregroundColor(.gray)
-                    
-                    Text("Aucun utilisateur trouvé")
-                        .font(.headline)
-                        .foregroundColor(.gray)
-                    
-                    Text("Essayez un autre terme de recherche")
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-                }
-                .padding(.top, 100)
-                .frame(maxWidth: .infinity)
-            } else {
-                List {
-                    ForEach(searchResults) { user in
-                        NavigationLink(destination: UserProfileView(user: user)) {
-                            HStack(spacing: 15) {
-                                // Photo de profil
-                                if let profilePicture = user.profilePicture, 
-                                   !profilePicture.isEmpty,
-                                   let url = URL(string: profilePicture) {
-                                    KFImage(url)
-                                        .placeholder {
-                                            ProgressView()
-                                        }
-                                        .cancelOnDisappear(true)
-                                        .resizable()
-                                        .scaledToFill()
-                                        .frame(width: 50, height: 50)
-                                        .clipShape(Circle())
-                                } else {
-                                    Image(systemName: "person.crop.circle")
-                                        .resizable()
-                                        .frame(width: 50, height: 50)
-                                        .foregroundColor(.gray)
+            .offset(x: offset) // Appliquer le décalage horizontal
+            .gesture(
+                DragGesture()
+                    .onChanged { value in
+                        // Permettre le drag seulement vers la droite (pour revenir)
+                        if value.translation.width > 0 {
+                            offset = value.translation.width
+                        }
+                    }
+                    .onEnded { value in
+                        // Si le drag est suffisamment long, on ferme la vue
+                        if value.translation.width > geometry.size.width * 0.3 {
+                            dismiss()
+                        } else {
+                            // Sinon on revient à la position initiale avec animation
+                            withAnimation {
+                                offset = 0
+                            }
+                        }
+                    }
+            )
+            // Ajouter un indicateur visuel pour le swipe
+            .overlay(
+                Rectangle()
+                    .fill(Color.gray.opacity(0.01))
+                    .frame(width: 20)
+                    .onTapGesture {} // Pour capturer les taps
+                    .gesture(
+                        DragGesture()
+                            .onChanged { value in
+                                if value.translation.width > 0 {
+                                    offset = value.translation.width
                                 }
-                                
-                                VStack(alignment: .leading, spacing: 3) {
-                                    Text(user.name)
-                                        .font(.headline)
-                                    
-                                    if user.id == appData.currentUser?.id {
-                                        Text("Votre compte")
-                                            .font(.subheadline)
-                                            .foregroundColor(.gray)
+                            }
+                            .onEnded { value in
+                                if value.translation.width > geometry.size.width * 0.3 {
+                                    dismiss()
+                                } else {
+                                    withAnimation {
+                                        offset = 0
                                     }
                                 }
                             }
-                            .padding(.vertical, 5)
-                        }
-                    }
-                }
-                .listStyle(PlainListStyle())
-            }
+                    ),
+                alignment: .leading
+            )
         }
         .navigationBarHidden(true)
         .onAppear {
             if !searchQuery.isEmpty {
                 performSearch()
+            }
+        }
+        .onChange(of: searchQuery) { newValue in
+            if newValue.isEmpty {
+                searchResults = []
             }
         }
     }

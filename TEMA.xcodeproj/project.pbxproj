@@ -11,6 +11,9 @@
 		F339166E2D4AFD3E000F8B68 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = F339166D2D4AFD3E000F8B68 /* FirebaseAuth */; };
 		F33916702D4AFD3E000F8B68 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = F339166F2D4AFD3E000F8B68 /* FirebaseFirestore */; };
 		F33916722D4AFD3E000F8B68 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = F33916712D4AFD3E000F8B68 /* FirebaseStorage */; };
+		F38C5C132D920C530057CA48 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F38C5C122D920C530057CA48 /* WidgetKit.framework */; };
+		F38C5C152D920C530057CA48 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F38C5C142D920C530057CA48 /* SwiftUI.framework */; };
+		F38C5C262D920C540057CA48 /* TemaWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = F38C5C102D920C530057CA48 /* TemaWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		F3C3ABDA2D6B713700D3D967 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = F3C3ABD92D6B713700D3D967 /* Kingfisher */; };
 /* End PBXBuildFile section */
 
@@ -29,13 +32,47 @@
 			remoteGlobalIDString = F32691A22D46E8140061DC55;
 			remoteInfo = TEMA;
 		};
+		F38C5C242D920C540057CA48 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F326919B2D46E8140061DC55 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F38C5C0F2D920C530057CA48;
+			remoteInfo = TemaWidgetExtension;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		F38C5C2B2D920C540057CA48 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				F38C5C262D920C540057CA48 /* TemaWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		F32691A32D46E8140061DC55 /* TEMA.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TEMA.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F32691B32D46E8150061DC55 /* TEMATests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TEMATests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F32691BD2D46E8150061DC55 /* TEMAUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TEMAUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F38C5C102D920C530057CA48 /* TemaWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TemaWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		F38C5C122D920C530057CA48 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		F38C5C142D920C530057CA48 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		F38C5C272D920C540057CA48 /* Exceptions for "TemaWidget" folder in "TemaWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = F38C5C0F2D920C530057CA48 /* TemaWidgetExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		F32691A52D46E8140061DC55 /* TEMA */ = {
@@ -51,6 +88,14 @@
 		F32691C02D46E8150061DC55 /* TEMAUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = TEMAUITests;
+			sourceTree = "<group>";
+		};
+		F38C5C162D920C530057CA48 /* TemaWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				F38C5C272D920C540057CA48 /* Exceptions for "TemaWidget" folder in "TemaWidgetExtension" target */,
+			);
+			path = TemaWidget;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -82,6 +127,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		F38C5C0D2D920C530057CA48 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F38C5C152D920C530057CA48 /* SwiftUI.framework in Frameworks */,
+				F38C5C132D920C530057CA48 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -91,6 +145,8 @@
 				F32691A52D46E8140061DC55 /* TEMA */,
 				F32691B62D46E8150061DC55 /* TEMATests */,
 				F32691C02D46E8150061DC55 /* TEMAUITests */,
+				F38C5C162D920C530057CA48 /* TemaWidget */,
+				F38C5C112D920C530057CA48 /* Frameworks */,
 				F32691A42D46E8140061DC55 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -101,8 +157,18 @@
 				F32691A32D46E8140061DC55 /* TEMA.app */,
 				F32691B32D46E8150061DC55 /* TEMATests.xctest */,
 				F32691BD2D46E8150061DC55 /* TEMAUITests.xctest */,
+				F38C5C102D920C530057CA48 /* TemaWidgetExtension.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		F38C5C112D920C530057CA48 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F38C5C122D920C530057CA48 /* WidgetKit.framework */,
+				F38C5C142D920C530057CA48 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -115,10 +181,12 @@
 				F326919F2D46E8140061DC55 /* Sources */,
 				F32691A02D46E8140061DC55 /* Frameworks */,
 				F32691A12D46E8140061DC55 /* Resources */,
+				F38C5C2B2D920C540057CA48 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				F38C5C252D920C540057CA48 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				F32691A52D46E8140061DC55 /* TEMA */,
@@ -181,6 +249,28 @@
 			productReference = F32691BD2D46E8150061DC55 /* TEMAUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		F38C5C0F2D920C530057CA48 /* TemaWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F38C5C282D920C540057CA48 /* Build configuration list for PBXNativeTarget "TemaWidgetExtension" */;
+			buildPhases = (
+				F38C5C0C2D920C530057CA48 /* Sources */,
+				F38C5C0D2D920C530057CA48 /* Frameworks */,
+				F38C5C0E2D920C530057CA48 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				F38C5C162D920C530057CA48 /* TemaWidget */,
+			);
+			name = TemaWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = TemaWidgetExtension;
+			productReference = F38C5C102D920C530057CA48 /* TemaWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -201,6 +291,9 @@
 					F32691BC2D46E8150061DC55 = {
 						CreatedOnToolsVersion = 16.2;
 						TestTargetID = F32691A22D46E8140061DC55;
+					};
+					F38C5C0F2D920C530057CA48 = {
+						CreatedOnToolsVersion = 16.2;
 					};
 				};
 			};
@@ -225,6 +318,7 @@
 				F32691A22D46E8140061DC55 /* TEMA */,
 				F32691B22D46E8150061DC55 /* TEMATests */,
 				F32691BC2D46E8150061DC55 /* TEMAUITests */,
+				F38C5C0F2D920C530057CA48 /* TemaWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -245,6 +339,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		F32691BB2D46E8150061DC55 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F38C5C0E2D920C530057CA48 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -275,6 +376,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		F38C5C0C2D920C530057CA48 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -287,6 +395,11 @@
 			isa = PBXTargetDependency;
 			target = F32691A22D46E8140061DC55 /* TEMA */;
 			targetProxy = F32691BE2D46E8150061DC55 /* PBXContainerItemProxy */;
+		};
+		F38C5C252D920C540057CA48 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F38C5C0F2D920C530057CA48 /* TemaWidgetExtension */;
+			targetProxy = F38C5C242D920C540057CA48 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -558,6 +671,60 @@
 			};
 			name = Release;
 		};
+		F38C5C292D920C540057CA48 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = X9F74KV6QN;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TemaWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = TemaWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.LeBas.TEMA.TemaWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		F38C5C2A2D920C540057CA48 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = X9F74KV6QN;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TemaWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = TemaWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.LeBas.TEMA.TemaWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -593,6 +760,15 @@
 			buildConfigurations = (
 				F32691CE2D46E8150061DC55 /* Debug */,
 				F32691CF2D46E8150061DC55 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F38C5C282D920C540057CA48 /* Build configuration list for PBXNativeTarget "TemaWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F38C5C292D920C540057CA48 /* Debug */,
+				F38C5C2A2D920C540057CA48 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

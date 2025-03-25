@@ -111,10 +111,7 @@ struct ContentView: View {
                                         isSearchActive = true
                                     }
                                 })
-                                .placeholder(when: searchText.isEmpty) {
-                                    Text("Rechercher un utilisateur")
-                                        .foregroundColor(.gray)
-                                }
+                                
                                 .textFieldStyle(PlainTextFieldStyle())
                                 .foregroundColor(.primary)
                                 .frame(height: 34)
@@ -178,12 +175,16 @@ struct ContentView: View {
                 .overlay(Color(UIColor.systemBackground).opacity(hideHeader ? 1 : 0))
             }
         }
-        // Remplacer le NavigationLink par fullScreenCover
+        // Utiliser une approche plus standard pour la navigation
         .fullScreenCover(isPresented: $isSearchActive) {
             NavigationView {
                 SearchView(searchQuery: searchText)
                     .environmentObject(appData)
             }
+            .navigationViewStyle(StackNavigationViewStyle())
+            // Ajouter une transition pour un effet plus fluide
+            .transition(.move(edge: .trailing))
+            .animation(.easeInOut, value: isSearchActive)
         }
         .navigationBarHidden(true)
     }

@@ -27,39 +27,54 @@ struct PostView: View {
     @State private var textColor: Color = .primary
     @Environment(\.colorScheme) var colorScheme
     
+    // États pour le zoom et la position
+    @State private var scale: CGFloat = 1.0
+    @State private var lastScale: CGFloat = 1.0
+    @State private var offset: CGSize = .zero
+    @State private var lastOffset: CGSize = .zero
+    @State private var isZooming: Bool = false
+    
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 0) { // Réduit l'espacement global du VStack à 0
             if let url = URL(string: post.imageUrl) {
-                KFImage(url)
-                    .placeholder {
-                        ProgressView()
-                            .frame(height: 200)
-                    }
-                    .cancelOnDisappear(true)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(maxWidth: UIScreen.main.bounds.width)
-                    .contextMenu {
-                        if appData.currentUser?.id == post.authorId {
-                            Button(role: .destructive) {
-                                appData.deletePost(post)
-                            } label: {
-                                Label("Supprimer", systemImage: "trash")
+                ZStack {
+                    KFImage(url)
+                        .placeholder {
+                            ProgressView()
+                                .frame(height: 200)
+                        }
+                        .cancelOnDisappear(true)
+                        .resizable()
+                        .scaledToFit()
+                        .offset(offset)
+                        .scaleEffect(scale)
+                        .animation(.spring(), value: scale)
+                        .animation(.interactiveSpring(), value: offset)
+                        .contextMenu {
+                            if appData.currentUser?.id == post.authorId {
+                                Button(role: .destructive) {
+                                    appData.deletePost(post)
+                                } label: {
+                                    Label("Supprimer", systemImage: "trash")
+                                }
                             }
                         }
-                    }
-                    .onAppear {
-                        KingfisherManager.shared.retrieveImage(with: url) { result in
-                            switch result {
-                            case .success(let imageResult):
-                                let uiImage = imageResult.image
-                                let color = extractAndAdjustColor(from: uiImage)
-                                textColor = Color(uiColor: color)
-                            case .failure:
-                                textColor = .primary
+                        .onAppear {
+                            KingfisherManager.shared.retrieveImage(with: url) { result in
+                                switch result {
+                                case .success(let imageResult):
+                                    let uiImage = imageResult.image
+                                    let color = extractAndAdjustColor(from: uiImage)
+                                    textColor = Color(uiColor: color)
+                                case .failure:
+                                    textColor = .primary
+                                }
                             }
                         }
-                    }
+                }
+                .frame(maxWidth: UIScreen.main.bounds.width)
+                .clipped()
+                .allowsHitTesting(!isZooming || scale > 1.0)
             } else {
                 Color.clear
                     .frame(height: 200)
@@ -85,7 +100,8 @@ struct PostView: View {
             }
             .frame(height: 20)
             .padding(.horizontal, 6)
-            .padding(.top, 2)
+            // Suppression du padding en haut et ajout d'un padding minimal
+            .padding(.top, 1)
         }
         .onAppear {
             loadAuthor()
