@@ -5,11 +5,13 @@ import FirebaseFirestore
 struct HomeView: View {
     @EnvironmentObject var appData: AppData
     @Binding var hideHeader: Bool
+    @State private var isFirstAppearance = true
+    @State private var visiblePosts: [Post] = []
     
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
-            VStack(spacing: 30) {
-                ForEach(appData.posts.sorted(by: { $0.timestamp > $1.timestamp })) { post in
+            LazyVStack(spacing: 30) {
+                ForEach(visiblePosts.sorted(by: { $0.timestamp > $1.timestamp })) { post in
                     PostView(post: post)
                         .background(Color.clear)
                 }
@@ -17,6 +19,23 @@ struct HomeView: View {
             .padding(.vertical)
         }
         .background(Color.clear)
+        .onAppear {
+            if isFirstAppearance {
+                // Charger seulement un nombre limité de posts initialement pour un affichage plus rapide
+                DispatchQueue.main.async {
+                    // Limiter à 5 posts initialement pour une performance maximale
+                    visiblePosts = Array(appData.posts.prefix(5))
+                    
+                    // Charger le reste des posts après un court délai
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        visiblePosts = appData.posts
+                        isFirstAppearance = false
+                    }
+                }
+            } else {
+                visiblePosts = appData.posts
+            }
+        }
     }
 }
 
@@ -25,6 +44,7 @@ struct PostView: View {
     @EnvironmentObject var appData: AppData
     @State private var author: User? = nil
     @State private var textColor: Color = .primary
+    @State private var shouldCalculateColor = false
     @Environment(\.colorScheme) var colorScheme
     
     // États pour le zoom et la position
@@ -35,7 +55,7 @@ struct PostView: View {
     @State private var isZooming: Bool = false
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) { // Réduit l'espacement global du VStack à 0
+        VStack(alignment: .leading, spacing: 0) {
             if let url = URL(string: post.imageUrl) {
                 ZStack {
                     KFImage(url)
@@ -60,14 +80,27 @@ struct PostView: View {
                             }
                         }
                         .onAppear {
-                            KingfisherManager.shared.retrieveImage(with: url) { result in
-                                switch result {
-                                case .success(let imageResult):
-                                    let uiImage = imageResult.image
-                                    let color = extractAndAdjustColor(from: uiImage)
-                                    textColor = Color(uiColor: color)
-                                case .failure:
-                                    textColor = .primary
+                            // Décaler le calcul des couleurs pour améliorer la performance initiale
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                shouldCalculateColor = true
+                            }
+                        }
+                        .onChange(of: shouldCalculateColor) { calculate in
+                            if calculate {
+                                KingfisherManager.shared.retrieveImage(with: url) { result in
+                                    switch result {
+                                    case .success(let imageResult):
+                                        let uiImage = imageResult.image
+                                        // Exécuter le calcul coûteux en arrière-plan
+                                        DispatchQueue.global(qos: .userInitiated).async {
+                                            let color = extractAndAdjustColor(from: uiImage)
+                                            DispatchQueue.main.async {
+                                                textColor = Color(uiColor: color)
+                                            }
+                                        }
+                                    case .failure:
+                                        textColor = .primary
+                                    }
                                 }
                             }
                         }
@@ -100,7 +133,6 @@ struct PostView: View {
             }
             .frame(height: 20)
             .padding(.horizontal, 6)
-            // Suppression du padding en haut et ajout d'un padding minimal
             .padding(.top, 1)
         }
         .onAppear {

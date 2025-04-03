@@ -6,24 +6,18 @@
 //
 import SwiftUI
 import FirebaseFirestore
+import FirebaseStorage
 
 @available(iOS 16.0, *)
 struct ProfileAvatarPickerView: View {
     @EnvironmentObject var appData: AppData
     @Environment(\.dismiss) var dismiss
     
-    // Liste des avatars personnalisés (mise à jour pour correspondre aux noms réels d'assets)
-    private let avatarNames = [
-        "avatar1", "avatar2", "avatar3", "avatar4", "avatar5",
-        "avatar6", "avatar7", "avatar8", "avatar9", "avatar10",
-        "avatar11", "avatar12", "avatar13", "avatar14", "avatar15",
-        "avatar16", "avatar17", "avatar18", "avatar19", "avatar20",
-        "avatar21", "avatar22", "avatar23", "avatar24", "avatar25",
-        "avatar26", "avatar27", "avatar28", "avatar29", "avatar30",
-        "avatar31", "avatar_02", "avatar33", "avatar34"
-    ]
+    // Liste des avatars - maintenant dynamique
+    @State private var avatarNames: [String] = []
+    @State private var avatarUrls: [String: URL] = [:]
     
-    // Couleurs disponibles pour les avatars (optionnel si vos images ont déjà leurs propres couleurs)
+    // Couleurs disponibles pour les avatars
     private let avatarColors: [Color] = [
         .red, .blue, .green, .orange, .purple, 
         .pink, .yellow, .cyan, .indigo, .mint
@@ -32,7 +26,7 @@ struct ProfileAvatarPickerView: View {
     // États
     @State private var isLoading = true
     @State private var availableAvatars: [String] = []
-    @State private var selectedAvatar: String? = "avatar_02" // Charizard préselectionné
+    @State private var selectedAvatar: String? = nil
     @State private var selectedColor: Color = .red
     @State private var currentlyUsedAvatar: String? = nil
     @State private var currentlyUsedColor: Color = .red
@@ -111,7 +105,8 @@ struct ProfileAvatarPickerView: View {
                                         color: selectedColor,
                                         isSelected: selectedAvatar == avatarName,
                                         isAvailable: availableAvatars.contains(avatarName) || currentlyUsedAvatar == avatarName,
-                                        isCurrent: currentlyUsedAvatar == avatarName
+                                        isCurrent: currentlyUsedAvatar == avatarName,
+                                        avatarUrls: $avatarUrls
                                     )
                                     .onTapGesture {
                                         // Sélectionner uniquement si disponible ou déjà utilisé par cet utilisateur
@@ -161,76 +156,138 @@ struct ProfileAvatarPickerView: View {
         }
     }
     
-    // Charge les avatars disponibles depuis Firestore
+    // Charge les avatars disponibles depuis Firebase Storage
     private func loadAvailableAvatars() {
         isLoading = true
         errorMessage = nil
         
-        // Lors des tests, permettre tous les avatars
-        self.availableAvatars = self.avatarNames
-        self.isLoading = false
+        // Référence à Firebase Storage
+        let storage = Storage.storage()
+        let avatarsRef = storage.reference().child("Avatars")
         
-        // Détecter l'avatar déjà utilisé
-        if let currentUser = appData.currentUser, let profilePicture = currentUser.profilePicture {
-            // Extraction du nom de l'avatar à partir de l'URL
-            let parts = profilePicture.components(separatedBy: ":")
-            if parts.count >= 2, let avatarName = parts.first,
-               avatarNames.contains(avatarName) {
-                currentlyUsedAvatar = avatarName
-                selectedAvatar = avatarName // Pré-sélectionner l'avatar actuel
+        // Fonction pour obtenir la liste des avatars
+        avatarsRef.listAll { result, error in
+            if let error = error {
+                print("Erreur lors de la lecture des avatars depuis Firebase: \(error)")
+                // Fallback sur les avatars locaux si Firebase échoue
+                self.loadLocalAvatars()
+                return
+            }
+            
+            guard let items = result?.items, !items.isEmpty else {
+                print("Aucun avatar trouvé dans Firebase Storage")
+                // Fallback sur les avatars locaux si aucun avatar trouvé
+                self.loadLocalAvatars()
+                return
+            }
+            
+            print("Avatars trouvés dans Firebase Storage: \(items.count)")
+            
+            // Réinitialiser les listes
+            self.avatarNames = []
+            self.avatarUrls = [:]
+            var loadedCount = 0
+            
+            // Pour chaque avatar, obtenir l'URL
+            for item in items {
+                let avatarName = item.name.replacingOccurrences(of: ".png", with: "")
+                self.avatarNames.append(avatarName)
                 
-                // Extraire la couleur
-                if let colorStr = parts.last,
-                   let color = colorFromString(colorStr) {
-                    currentlyUsedColor = color
-                    selectedColor = color
+                // Obtenir l'URL téléchargeable
+                item.downloadURL { url, error in
+                    loadedCount += 1
+                    
+                    if let error = error {
+                        print("Erreur lors de l'obtention de l'URL pour \(avatarName): \(error)")
+                    } else if let url = url {
+                        self.avatarUrls[avatarName] = url
+                        print("URL obtenue pour \(avatarName): \(url)")
+                    }
+                    
+                    // Si tous les avatars sont traités
+                    if loadedCount == items.count {
+                        DispatchQueue.main.async {
+                            // Pour les tests, permettre tous les avatars
+                            self.availableAvatars = self.avatarNames
+                            
+                            // Détecter l'avatar déjà utilisé
+                            if let currentUser = self.appData.currentUser, let profilePicture = currentUser.profilePicture {
+                                let parts = profilePicture.components(separatedBy: ":")
+                                if parts.count >= 2, let avatarName = parts.first {
+                                    self.currentlyUsedAvatar = avatarName
+                                    self.selectedAvatar = avatarName
+                                    
+                                    // Extraire la couleur
+                                    if let colorStr = parts.last,
+                                       let color = self.colorFromString(colorStr) {
+                                        self.currentlyUsedColor = color
+                                        self.selectedColor = color
+                                    }
+                                }
+                            }
+                            
+                            self.isLoading = false
+                        }
+                    }
                 }
             }
         }
-        
-        /* Commenté pour le moment pour les tests
-        let db = Firestore.firestore()
-        
-        // 2. Récupérer tous les avatars déjà utilisés
-        db.collection("users")
-            .whereField("profilePicture", isGreaterThan: "")
-            .getDocuments { snapshot, error in
-                if let error = error {
-                    self.errorMessage = "Erreur: \(error.localizedDescription)"
-                    self.isLoading = false
-                    return
-                }
+    }
+    
+    // Fonction de fallback pour charger les avatars locaux
+    private func loadLocalAvatars() {
+        if let bundlePath = Bundle.main.resourcePath {
+            let avatarPath = (bundlePath as NSString).appendingPathComponent("AvatarsPokemons")
+            
+            do {
+                // Vérifier si le dossier existe
+                var isDirectory: ObjCBool = false
+                let exists = FileManager.default.fileExists(atPath: avatarPath, isDirectory: &isDirectory)
                 
-                // Extraire les noms d'avatars déjà utilisés et leur couleur
-                var usedAvatarCombinations: [String] = []
-                if let documents = snapshot?.documents {
-                    for doc in documents {
-                        if let profilePicture = doc.data()["profilePicture"] as? String {
-                            // Format attendu: "avatarName:colorName"
-                            usedAvatarCombinations.append(profilePicture)
-                        }
-                    }
-                }
-                
-                // Déterminer les avatars disponibles
-                self.availableAvatars = self.avatarNames.filter { avatarName in
-                    // Vérifier si chaque combinaison avatar+couleur n'est pas déjà utilisée
-                    for combination in usedAvatarCombinations {
-                        let parts = combination.components(separatedBy: ":")
-                        if parts.count >= 1 && parts[0] == avatarName {
-                            // Si c'est déjà l'avatar de l'utilisateur actuel, c'est disponible
-                            if avatarName == self.currentlyUsedAvatar {
-                                return true
+                if exists && isDirectory.boolValue {
+                    print("Dossier AvatarsPokemons trouvé à: \(avatarPath)")
+                    
+                    // Lire tous les fichiers PNG du dossier
+                    let files = try FileManager.default.contentsOfDirectory(atPath: avatarPath)
+                    let pngFiles = files.filter { $0.hasSuffix(".png") }
+                    
+                    // Extraire les noms sans extension
+                    self.avatarNames = pngFiles.map { ($0 as NSString).deletingPathExtension }
+                    
+                    print("Avatars locaux trouvés: \(avatarNames.count)")
+                    
+                    // Pour les tests, permettre tous les avatars
+                    self.availableAvatars = self.avatarNames
+                    
+                    // Détecter l'avatar déjà utilisé
+                    if let currentUser = appData.currentUser, let profilePicture = currentUser.profilePicture {
+                        let parts = profilePicture.components(separatedBy: ":")
+                        if parts.count >= 2, let avatarName = parts.first {
+                            currentlyUsedAvatar = avatarName
+                            selectedAvatar = avatarName
+                            
+                            // Extraire la couleur
+                            if let colorStr = parts.last,
+                               let color = colorFromString(colorStr) {
+                                currentlyUsedColor = color
+                                selectedColor = color
                             }
-                            return false
                         }
                     }
-                    return true // Disponible si pas trouvé dans la liste
+                } else {
+                    print("Dossier AvatarsPokemons non trouvé à: \(avatarPath)")
+                    errorMessage = "Aucun avatar disponible"
                 }
-                
-                self.isLoading = false
+            } catch {
+                print("Erreur lors du chargement des avatars locaux: \(error.localizedDescription)")
+                errorMessage = "Erreur lors du chargement des avatars"
             }
-        */
+        } else {
+            print("Impossible d'accéder aux ressources du bundle")
+            errorMessage = "Erreur d'accès au bundle"
+        }
+        
+        self.isLoading = false
     }
     
     // Convertit une chaîne en couleur
@@ -298,9 +355,13 @@ struct AvatarCell: View {
     let isAvailable: Bool
     let isCurrent: Bool
     
-    // Pour le débogage
-    @State private var imageExists: Bool = false
-    @State private var imageName: String = ""
+    // Pour stocker l'URL de l'avatar
+    @Binding var avatarUrls: [String: URL]
+    
+    // État pour gérer l'image chargée
+    @State private var image: UIImage? = nil
+    @State private var isLoading = true
+    @State private var imageError = false
     
     // Dimensions de la cellule - réduites pour 3 par ligne
     private let cellWidth: CGFloat = 95
@@ -308,59 +369,83 @@ struct AvatarCell: View {
     private let imageWidth: CGFloat = 85
     private let imageHeight: CGFloat = 75
     
-    var body: some View {
-        ZStack {
-            // Image de l'avatar (image réelle depuis Assets)
-            if systemName.contains("avatar") {
-                ZStack {
-                    // Essaie de charger l'image
-                    if let image = UIImage(named: systemName) {
-                        Image(uiImage: image)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: imageWidth, height: imageHeight)
-                            .opacity(isAvailable ? 1.0 : 0.4)
-                        
-                        // Tick vert supprimé
+    // Fonction pour charger l'image depuis Firebase Storage
+    private func loadImage() {
+        isLoading = true
+        imageError = false
+        
+        // Essayer d'abord depuis Firebase Storage
+        if let url = avatarUrls[systemName] {
+            URLSession.shared.dataTask(with: url) { data, response, error in
+                DispatchQueue.main.async {
+                    if let data = data, let loadedImage = UIImage(data: data) {
+                        self.image = loadedImage
+                        self.isLoading = false
                     } else {
-                        // Afficher un texte de débogage si l'image n'existe pas
-                        VStack {
-                            Text(systemName)
-                                .font(.caption2) // Réduit la taille du texte
-                                .foregroundColor(.gray)
-                            
-                            Image(systemName: "exclamationmark.triangle")
-                                .foregroundColor(.orange)
-                                .font(.caption)
-                            
-                            Text("Not found")
-                                .font(.caption2)
-                                .foregroundColor(.red)
-                        }
-                        .padding(2) // Réduit le padding
-                        .frame(width: imageWidth, height: imageHeight)
+                        // Si le téléchargement échoue, essayer en local
+                        self.loadLocalImage()
                     }
                 }
-                .onAppear {
-                    // Détecter si l'image existe
-                    imageExists = UIImage(named: systemName) != nil
-                    imageName = systemName
-                }
+            }.resume()
+        } else {
+            // Si pas d'URL, essayer en local
+            loadLocalImage()
+        }
+    }
+    
+    // Fonction de fallback pour charger l'image locale
+    private func loadLocalImage() {
+        if let bundlePath = Bundle.main.resourcePath {
+            let avatarPath = (bundlePath as NSString).appendingPathComponent("AvatarsPokemons")
+            let imagePath = (avatarPath as NSString).appendingPathComponent("\(systemName).png")
+            
+            if let localImage = UIImage(contentsOfFile: imagePath) {
+                self.image = localImage
             } else {
-                // Fallback sur SF Symbol si l'image n'existe pas
-                Rectangle()
-                    .fill(color.opacity(0.15))
-                    .frame(width: 70, height: 70) // Réduit les dimensions
-                    .cornerRadius(8)
-                
-                Image(systemName: "person.fill")
-                    .resizable()
-                    .renderingMode(.template)
-                    .scaledToFit()
-                    .padding(14) // Réduit le padding
-                    .foregroundColor(color)
-                    .frame(width: 70, height: 70) // Réduit les dimensions
-                    .opacity(isAvailable ? 1.0 : 0.4)
+                self.imageError = true
+            }
+        } else {
+            self.imageError = true
+        }
+        
+        self.isLoading = false
+    }
+    
+    var body: some View {
+        ZStack {
+            // Image de l'avatar (chargée dynamiquement)
+            ZStack {
+                if isLoading {
+                    ProgressView()
+                        .frame(width: imageWidth, height: imageHeight)
+                } else if let image = image {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: imageWidth, height: imageHeight)
+                        .opacity(isAvailable ? 1.0 : 0.4)
+                } else {
+                    // Afficher un texte de débogage si l'image n'existe pas
+                    VStack {
+                        Text(systemName)
+                            .font(.caption2)
+                            .foregroundColor(.gray)
+                        
+                        Image(systemName: "exclamationmark.triangle")
+                            .foregroundColor(.orange)
+                            .font(.caption)
+                        
+                        Text("Not found")
+                            .font(.caption2)
+                            .foregroundColor(.red)
+                    }
+                    .padding(2)
+                    .frame(width: imageWidth, height: imageHeight)
+                }
+            }
+            .onAppear {
+                // Charger l'image au chargement de la cellule
+                loadImage()
             }
             
             // Bordure de sélection
@@ -373,27 +458,27 @@ struct AvatarCell: View {
             // Indicateur "Actuel"
             if isCurrent {
                 Text("Actuel")
-                    .font(.caption2) // Réduit la taille du texte
+                    .font(.caption2)
                     .foregroundColor(.white)
-                    .padding(.horizontal, 4) // Réduit le padding
-                    .padding(.vertical, 1) // Réduit le padding
+                    .padding(.horizontal, 4)
+                    .padding(.vertical, 1)
                     .background(Color.blue)
                     .cornerRadius(4)
-                    .position(x: 35, y: 12) // Ajusté pour la nouvelle taille
+                    .position(x: 35, y: 12)
             }
             
-            // Indicateur "Non disponible" - on garde ce texte pour être sûr que c'est clair
+            // Indicateur "Non disponible"
             if !isAvailable {
                 Text("Pris")
-                    .font(.caption2) // Réduit la taille du texte
+                    .font(.caption2)
                     .foregroundColor(.white)
-                    .padding(.horizontal, 4) // Réduit le padding
-                    .padding(.vertical, 1) // Réduit le padding
+                    .padding(.horizontal, 4)
+                    .padding(.vertical, 1)
                     .background(Color.red)
                     .cornerRadius(4)
-                    .position(x: 35, y: 12) // Ajusté pour la nouvelle taille
+                    .position(x: 35, y: 12)
+                }
             }
-        }
         .frame(width: cellWidth, height: cellHeight)
     }
 }

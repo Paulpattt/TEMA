@@ -69,12 +69,13 @@ struct AvatarView: View {
                 // Version circulaire
                 ZStack {
                     // Avatar: image personnalisée ou SF Symbol
-                    if symbolName.contains("avatar") {
+                    if symbolName.contains("avatar") || symbolName.contains("Pokemon") {
                         // Image personnalisée - avec vérification
                         ZStack {
-                            if let _ = UIImage(named: symbolName) {
+                            if let bundlePath = Bundle.main.resourcePath,
+                               let image = loadPokemonAvatar(named: symbolName) {
                                 // L'image existe - format rectangulaire pour les Pokémon
-                                Image(symbolName)
+                                Image(uiImage: image)
                                     .resizable()
                                     .scaledToFit()
                                     .frame(width: size * 1.15, height: size) // Ratio largeur/hauteur de 1.15
@@ -91,6 +92,7 @@ struct AvatarView: View {
                                         Text(symbolName)
                                             .font(.system(size: size * 0.15))
                                             .foregroundColor(.gray)
+                                            .lineLimit(1)
                                     }
                                 }
                                 .frame(width: size * 1.15, height: size)
@@ -115,12 +117,12 @@ struct AvatarView: View {
                 // Version rectangulaire
                 ZStack {
                     // Avatar: image personnalisée ou SF Symbol
-                    if symbolName.contains("avatar") {
+                    if symbolName.contains("avatar") || symbolName.contains("Pokemon") {
                         // Image personnalisée - avec vérification
                         ZStack {
-                            if let _ = UIImage(named: symbolName) {
+                            if let image = loadPokemonAvatar(named: symbolName) {
                                 // L'image existe - format rectangulaire pour les Pokémon
-                                Image(symbolName)
+                                Image(uiImage: image)
                                     .resizable()
                                     .scaledToFit()
                                     .frame(width: size * 1.15, height: size) // Ratio largeur/hauteur de 1.15
@@ -137,6 +139,7 @@ struct AvatarView: View {
                                         Text(symbolName)
                                             .font(.system(size: size * 0.15))
                                             .foregroundColor(.gray)
+                                            .lineLimit(1)
                                     }
                                 }
                                 .frame(width: size * 1.15, height: size)
@@ -160,6 +163,27 @@ struct AvatarView: View {
                 .clipShape(RoundedRectangle(cornerRadius: size * 0.1))
             }
         }
+    }
+    
+    // Fonction pour charger un avatar Pokémon depuis le bundle
+    private func loadPokemonAvatar(named: String) -> UIImage? {
+        // D'abord essayer avec UIImage(named:) standard
+        if let image = UIImage(named: named) {
+            return image
+        }
+        
+        // Sinon, chercher dans le dossier AvatarsPokemons
+        if let bundlePath = Bundle.main.resourcePath {
+            let avatarPath = (bundlePath as NSString).appendingPathComponent("AvatarsPokemons")
+            let imagePath = (avatarPath as NSString).appendingPathComponent("\(named).png")
+            
+            // Essayer de charger directement depuis le chemin
+            if let image = UIImage(contentsOfFile: imagePath) {
+                return image
+            }
+        }
+        
+        return nil
     }
     
     // Convertit une chaîne en couleur
