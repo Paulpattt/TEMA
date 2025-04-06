@@ -9,7 +9,7 @@ import SwiftUI
 
 /// Vue réutilisable pour afficher un avatar à partir d'un symbole système
 struct AvatarView: View {
-    // URL de profil au format "nomSymbole:couleur"
+    // URL de profil contient maintenant SEULEMENT le nom de l'asset (ex: "PokemonAvatar_0357_Avatar-35")
     let profileUrl: String?
     
     // Taille de l'avatar
@@ -18,10 +18,10 @@ struct AvatarView: View {
     // Forme circulaire (true) ou carrée (false)
     let isCircular: Bool
     
-    // Symbole par défaut si aucun n'est fourni
+    // Symbole par défaut si aucun n'est fourni ou si l'image n'est pas trouvée
     let defaultSymbol: String
     
-    // Couleur par défaut si aucune n'est fournie
+    // Couleur par défaut pour le placeholder
     let defaultColor: Color
     
     // Initialisateur avec valeurs par défaut
@@ -29,7 +29,7 @@ struct AvatarView: View {
         profileUrl: String?,
         size: CGFloat = 40,
         isCircular: Bool = false,
-        defaultSymbol: String = "person.fill",
+        defaultSymbol: String = "person.fill", // Placeholder si l'image n'est pas trouvée
         defaultColor: Color = .gray
     ) {
         self.profileUrl = profileUrl
@@ -39,205 +39,70 @@ struct AvatarView: View {
         self.defaultColor = defaultColor
     }
     
-    private var symbolName: String {
-        guard let profileUrl = profileUrl, !profileUrl.isEmpty else {
-            return defaultSymbol
-        }
-        
-        let parts = profileUrl.components(separatedBy: ":")
-        if parts.count >= 1 {
-            return parts[0]
-        }
-        return defaultSymbol
-    }
-    
-    private var symbolColor: Color {
-        guard let profileUrl = profileUrl, !profileUrl.isEmpty else {
-            return defaultColor
-        }
-        
-        let parts = profileUrl.components(separatedBy: ":")
-        if parts.count >= 2 {
-            return colorFromString(parts[1]) ?? defaultColor
-        }
-        return defaultColor
-    }
-    
     var body: some View {
-        Group {
-            if isCircular {
-                // Version circulaire
-                ZStack {
-                    // Avatar: image personnalisée ou SF Symbol
-                    if symbolName.contains("avatar") || symbolName.contains("Pokemon") {
-                        // Image personnalisée - avec vérification
-                        ZStack {
-                            if let bundlePath = Bundle.main.resourcePath,
-                               let image = loadPokemonAvatar(named: symbolName) {
-                                // L'image existe - format rectangulaire pour les Pokémon
-                                Image(uiImage: image)
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: size * 1.15, height: size) // Ratio largeur/hauteur de 1.15
-                            } else {
-                                // L'image n'existe pas - montrer un placeholder
-                                VStack {
-                                    Image(systemName: "photo")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .padding(size * 0.25)
-                                        .foregroundColor(.gray)
-                                    
-                                    if size > 30 {
-                                        Text(symbolName)
-                                            .font(.system(size: size * 0.15))
-                                            .foregroundColor(.gray)
-                                            .lineLimit(1)
-                                    }
-                                }
-                                .frame(width: size * 1.15, height: size)
-                            }
-                        }
-                    } else {
-                        // SF Symbol - garder le fond circulaire
-                        Circle()
-                            .fill(symbolColor.opacity(0.15))
-                            .frame(width: size, height: size)
-                        
-                        Image(systemName: symbolName)
-                            .resizable()
-                            .scaledToFit()
-                            .padding(size * 0.2)
-                            .foregroundColor(symbolColor)
-                            .frame(width: size, height: size)
-                    }
-                }
-                .clipShape(Circle())
-            } else {
-                // Version rectangulaire
-                ZStack {
-                    // Avatar: image personnalisée ou SF Symbol
-                    if symbolName.contains("avatar") || symbolName.contains("Pokemon") {
-                        // Image personnalisée - avec vérification
-                        ZStack {
-                            if let image = loadPokemonAvatar(named: symbolName) {
-                                // L'image existe - format rectangulaire pour les Pokémon
-                                Image(uiImage: image)
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: size * 1.15, height: size) // Ratio largeur/hauteur de 1.15
-                            } else {
-                                // L'image n'existe pas - montrer un placeholder
-                                VStack {
-                                    Image(systemName: "photo")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .padding(size * 0.25)
-                                        .foregroundColor(.gray)
-                                    
-                                    if size > 30 {
-                                        Text(symbolName)
-                                            .font(.system(size: size * 0.15))
-                                            .foregroundColor(.gray)
-                                            .lineLimit(1)
-                                    }
-                                }
-                                .frame(width: size * 1.15, height: size)
-                            }
-                        }
-                    } else {
-                        // SF Symbol - garder le fond rectangulaire
-                        Rectangle()
-                            .fill(symbolColor.opacity(0.15))
-                            .frame(width: size, height: size)
-                            .cornerRadius(size * 0.1)
-                        
-                        Image(systemName: symbolName)
-                            .resizable()
-                            .scaledToFit()
-                            .padding(size * 0.2)
-                            .foregroundColor(symbolColor)
-                            .frame(width: size, height: size)
-                    }
-                }
-                .clipShape(RoundedRectangle(cornerRadius: size * 0.1))
-            }
+        // Essaie de charger l'image directement depuis les Assets
+        if let assetName = profileUrl, let uiImage = UIImage(named: assetName) {
+            Image(uiImage: uiImage)
+                .resizable()
+                .scaledToFit() // Utiliser scaledToFit pour ne pas déformer
+                .frame(width: size, height: size) // Cadre carré initial
+                .background(Color.clear) // Fond transparent
+                .clipShape(shape) // Appliquer la forme (cercle ou rectangle arrondi)
+
+        } else {
+            // Placeholder si profileUrl est nil ou si l'image n'est pas trouvée dans les Assets
+            placeholderView
         }
     }
     
-    // Fonction pour charger un avatar Pokémon depuis le bundle
-    private func loadPokemonAvatar(named: String) -> UIImage? {
-        // D'abord essayer avec UIImage(named:) standard
-        if let image = UIImage(named: named) {
-            return image
-        }
-        
-        // Sinon, chercher dans le dossier AvatarsPokemons
-        if let bundlePath = Bundle.main.resourcePath {
-            let avatarPath = (bundlePath as NSString).appendingPathComponent("AvatarsPokemons")
-            let imagePath = (avatarPath as NSString).appendingPathComponent("\(named).png")
+    // Vue pour le placeholder
+    private var placeholderView: some View {
+        ZStack {
+            shape.fill(defaultColor.opacity(0.15)) // Fond coloré léger
             
-            // Essayer de charger directement depuis le chemin
-            if let image = UIImage(contentsOfFile: imagePath) {
-                return image
-            }
+            Image(systemName: defaultSymbol)
+                .resizable()
+                .scaledToFit()
+                .foregroundColor(defaultColor)
+                .padding(size * 0.25) // Padding pour l'icône
         }
-        
-        return nil
+        .frame(width: size, height: size)
     }
     
-    // Convertit une chaîne en couleur
-    private func colorFromString(_ colorStr: String) -> Color? {
-        switch colorStr {
-        case "red": return .red
-        case "blue": return .blue
-        case "green": return .green
-        case "orange": return .orange
-        case "purple": return .purple
-        case "pink": return .pink
-        case "yellow": return .yellow
-        case "cyan": return .cyan
-        case "indigo": return .indigo
-        case "mint": return .mint
-        default: return nil
+    // Détermine la forme à utiliser pour le clip et l'overlay
+    // Utiliser AnyShape pour effacer le type concret
+    private var shape: AnyShape { // <<<< Retourner AnyShape explicitement
+        if isCircular {
+            return AnyShape(Circle()) // <<<< Wrapper dans AnyShape
+        } else {
+            return AnyShape(RoundedRectangle(cornerRadius: size * 0.1)) // <<<< Wrapper dans AnyShape
         }
     }
 }
 
-// Prévisualisations
+// Prévisualisations (à adapter si les noms d'assets ont changé)
 struct AvatarView_Previews: PreviewProvider {
     static var previews: some View {
         VStack(spacing: 20) {
-            // Nouvelles images d'avatar Pokémon
+            // Utiliser des noms d'assets réels qui sont dans Assets.xcassets
             HStack(spacing: 10) {
-                AvatarView(profileUrl: "avatar_02:red", size: 70)
-                AvatarView(profileUrl: "avatar1:blue", size: 70)
+                // Remplace "PokemonAvatar_0357_Avatar-35" par un nom d'asset valide si besoin
+                AvatarView(profileUrl: "PokemonAvatar_0357_Avatar-35", size: 70, isCircular: true)
+                AvatarView(profileUrl: "PokemonAvatar_0356_Avatar-36", size: 70, isCircular: true) // Autre exemple
+                AvatarView(profileUrl: "asset_inexistant", size: 70, isCircular: true) // Test placeholder
             }
             .padding()
             .background(Color.gray.opacity(0.1))
-            .previewDisplayName("Avatars Pokémon")
-            
-            // Test format rectangulaire
-            AvatarView(profileUrl: "avatar_02:red", size: 85, isCircular: false)
-                .background(Color.gray.opacity(0.1))
-                .previewDisplayName("Pokémon rectangulaire")
-            
-            // Différentes tailles en carré
+            .previewDisplayName("Avatars Locaux (Cercle)")
+
             HStack(spacing: 10) {
-                AvatarView(profileUrl: "person.fill:red", size: 30)
-                AvatarView(profileUrl: "star.fill:blue", size: 50)
-                AvatarView(profileUrl: "heart.fill:green", size: 70)
+                AvatarView(profileUrl: "PokemonAvatar_0357_Avatar-35", size: 70, isCircular: false)
+                AvatarView(profileUrl: "PokemonAvatar_0356_Avatar-36", size: 70, isCircular: false)
+                AvatarView(profileUrl: nil, size: 70, isCircular: false) // Test placeholder (nil)
             }
-            
-            // Différentes tailles en cercle
-            HStack(spacing: 10) {
-                AvatarView(profileUrl: "person.fill:red", size: 30, isCircular: true)
-                AvatarView(profileUrl: "star.fill:blue", size: 50, isCircular: true)
-                AvatarView(profileUrl: "heart.fill:green", size: 70, isCircular: true)
-            }
-            
-            // Cas par défaut
-            AvatarView(profileUrl: nil, size: 50)
+            .padding()
+            .background(Color.gray.opacity(0.1))
+            .previewDisplayName("Avatars Locaux (Carré)")
         }
         .padding()
         .previewLayout(.sizeThatFits)

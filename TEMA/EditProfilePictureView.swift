@@ -324,7 +324,7 @@ struct ProfileAvatarPickerView: View {
     
     // Enregistre l'avatar sélectionné
     private func saveSelectedAvatar() {
-        guard let selectedAvatar = selectedAvatar, let currentUser = appData.currentUser else {
+        guard let selectedAssetName = selectedAvatar, let currentUser = appData.currentUser else {
             errorMessage = "Veuillez sélectionner un avatar"
             return
         }
@@ -332,12 +332,11 @@ struct ProfileAvatarPickerView: View {
         isLoading = true
         errorMessage = nil
         
-        // Format: "nomAvatar:couleur" (ex: "avatar1:red")
-        // Nous conservons le format avec la couleur pour la compatibilité, même si la couleur n'est pas utilisée pour les images
-        let avatarUrl = "\(selectedAvatar):\(stringFromColor(selectedColor))"
+        // Format: Juste le nom de l'asset (ex: "PokemonAvatar_0357_Avatar-35")
+        let assetName = selectedAssetName
         
-        // Mise à jour du profil utilisateur dans Firestore
-        appData.updateProfilePicture(url: avatarUrl)
+        // Mise à jour du profil utilisateur dans Firestore avec SEULEMENT le nom
+        appData.updateProfilePicture(url: assetName)
         
         // Mettre à jour l'interface utilisateur
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
