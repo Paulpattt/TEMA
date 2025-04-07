@@ -77,13 +77,12 @@ struct ContentView: View {
                             Button(action: {
                                 selectedTab = 0
                             }) {
-                                Text("TEMA")
-                                    .font(.largeTitle)
-                                    .bold()
-                                    .foregroundColor(Color("TEMA_Red"))
+                                Image("LaunchLogo")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(height: 100)
                             }
-                            // Décale le logo TEMA vers la droite
-                            .padding(.leading, 12)
+                            .padding(.leading, 0)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             
                             Spacer()
