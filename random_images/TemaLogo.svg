@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="0.001mm"
+   height="0.001mm"
+   viewBox="0 0 0.00099999962 0.0010000001"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
+   sodipodi:docname="TemaLogo.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#b32020"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="1.6746223"
+     inkscape:cx="97.93253"
+     inkscape:cy="144.21162"
+     inkscape:window-width="1472"
+     inkscape:window-height="834"
+     inkscape:window-x="0"
+     inkscape:window-y="38"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg1"
+     showgrid="true"
+     showguides="true">
+    <inkscape:grid
+       id="grid24"
+       units="mm"
+       originx="-39.653233"
+       originy="-48.807644"
+       spacingx="0.99999999"
+       spacingy="0.99999999"
+       empcolor="#0099e5"
+       empopacity="0.30196078"
+       color="#0099e5"
+       opacity="0.14901961"
+       empspacing="5"
+       enabled="false"
+       visible="false" />
+    <inkscape:grid
+       id="grid25"
+       units="mm"
+       originx="-39.653233"
+       originy="-48.807644"
+       spacingx="0.99999999"
+       spacingy="0.99999999"
+       empcolor="#0099e5"
+       empopacity="0.30196078"
+       color="#0099e5"
+       opacity="0.14901961"
+       empspacing="5"
+       enabled="false"
+       visible="true" />
+    <inkscape:grid
+       id="grid26"
+       units="mm"
+       originx="-39.653233"
+       originy="-48.807644"
+       spacingx="0.99999999"
+       spacingy="0.99999999"
+       empcolor="#0099e5"
+       empopacity="0.30196078"
+       color="#0099e5"
+       opacity="0.14901961"
+       empspacing="5"
+       enabled="false"
+       visible="true" />
+  </sodipodi:namedview>
+  <defs
+     id="defs1">
+    <color-profile
+       name="SMPTE-RP-431-2-2007-DCI-P3"
+       xlink:href="file:///System/Library/ColorSync/Profiles/DCI(P3)%20RGB.icc"
+       id="color-profile1" />
+    <pattern
+       inkscape:collect="always"
+       xlink:href="#pattern23"
+       preserveAspectRatio="xMidYMid"
+       id="pattern24"
+       patternTransform="matrix(10,0,0,10,-49.602133,-50.883531)"
+       x="0"
+       y="0" />
+    <pattern
+       inkscape:collect="always"
+       style="fill:#141414"
+       patternUnits="userSpaceOnUse"
+       width="2"
+       height="2"
+       patternTransform="translate(0,0) scale(10,10)"
+       id="pattern23"
+       inkscape:stockid="Checkerboard"
+       preserveAspectRatio="xMidYMid"
+       inkscape:isstock="true"
+       inkscape:label="Damier">
+      <rect
+         style="stroke:none"
+         x="0"
+         y="0"
+         width="1"
+         height="1"
+         id="rect22" />
+      <rect
+         style="stroke:none"
+         x="1"
+         y="1"
+         width="1"
+         height="1"
+         id="rect23" />
+    </pattern>
+    <rect
+       x="269.62088"
+       y="271.11877"
+       width="337.02612"
+       height="356.49872"
+       id="rect1" />
+  </defs>
+  <rect
+     style="fill:#b32529;stroke:none;stroke-width:5.34988;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;fill-opacity:1"
+     id="rect18"
+     width="80"
+     height="80"
+     x="-9.4977598"
+     y="-1.6023648"
+     inkscape:label="Fond Rouge" />
+  <rect
+     style="fill:url(#pattern24);fill-opacity:1;stroke:#ad816f;stroke-width:2.45;stroke-linecap:round;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+     id="rect18-6"
+     width="80.612892"
+     height="80.817177"
+     x="-9.5410833"
+     y="-1.2594807"
+     inkscape:label="Fond noir"
+     ry="0.20429616" />
+</svg>

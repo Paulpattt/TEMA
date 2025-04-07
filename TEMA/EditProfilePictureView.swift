@@ -329,18 +329,28 @@ struct ProfileAvatarPickerView: View {
             return
         }
         
+        // Retrieve the URL from the dictionary using the selected asset name
+        guard let selectedAvatarUrl = avatarUrls[selectedAssetName] else {
+            errorMessage = "Erreur : URL de l'avatar sélectionné non trouvée."
+            print("Error: Could not find URL for selected avatar name \(selectedAssetName) in avatarUrls dictionary.")
+            isLoading = false
+            return
+        }
+        
         isLoading = true
         errorMessage = nil
         
-        // Format: Juste le nom de l'asset (ex: "PokemonAvatar_0357_Avatar-35")
-        let assetName = selectedAssetName
+        // Convert URL to String
+        let urlString = selectedAvatarUrl.absoluteString
         
-        // Mise à jour du profil utilisateur dans Firestore avec SEULEMENT le nom
-        appData.updateProfilePicture(url: assetName)
+        // Mise à jour du profil utilisateur dans Firestore avec l'URL complète
+        print("Saving avatar URL to Firestore: \(urlString)")
+        appData.updateProfilePicture(url: urlString) // Pass the full URL string
         
         // Mettre à jour l'interface utilisateur
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { // Keep delay for feedback/network time
             self.isLoading = false
+            // Check if update was successful maybe? For now, just dismiss.
             self.dismiss()
         }
     }

@@ -40,18 +40,37 @@ struct AvatarView: View {
     }
     
     var body: some View {
-        // Essaie de charger l'image directement depuis les Assets
-        if let assetName = profileUrl, let uiImage = UIImage(named: assetName) {
-            Image(uiImage: uiImage)
-                .resizable()
-                .scaledToFit() // Utiliser scaledToFit pour ne pas déformer
-                .frame(width: size, height: size) // Cadre carré initial
-                .background(Color.clear) // Fond transparent
-                .clipShape(shape) // Appliquer la forme (cercle ou rectangle arrondi)
-
+        // Try creating a URL from the profileUrl string
+        if let urlString = profileUrl, let url = URL(string: urlString) {
+            // Use AsyncImage to load from the URL
+            AsyncImage(url: url) { phase in
+                switch phase {
+                case .empty:
+                    // Placeholder while loading
+                    placeholderView // Or ProgressView()
+                        .clipShape(shape)
+                case .success(let image):
+                    // Image loaded successfully
+                    image
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: size, height: size)
+                        .background(Color.clear)
+                        .clipShape(shape)
+                case .failure:
+                    // Placeholder on failure
+                    placeholderView
+                        .clipShape(shape)
+                @unknown default:
+                    // Fallback placeholder
+                    placeholderView
+                        .clipShape(shape)
+                }
+            }
         } else {
-            // Placeholder si profileUrl est nil ou si l'image n'est pas trouvée dans les Assets
+            // Placeholder if profileUrl is nil or not a valid URL string
             placeholderView
+                .clipShape(shape)
         }
     }
     
