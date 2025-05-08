@@ -5,13 +5,11 @@ import FirebaseFirestore
 struct HomeView: View {
     @EnvironmentObject var appData: AppData
     @Binding var hideHeader: Bool
-    @State private var isFirstAppearance = true
-    @State private var visiblePosts: [Post] = []
     
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
             LazyVStack(spacing: 30) {
-                ForEach(visiblePosts.sorted(by: { $0.timestamp > $1.timestamp })) { post in
+                ForEach(appData.posts) { post in
                     PostView(post: post)
                         .background(Color.clear)
                 }
@@ -19,23 +17,6 @@ struct HomeView: View {
             .padding(.vertical)
         }
         .background(Color.clear)
-        .onAppear {
-            if isFirstAppearance {
-                // Charger seulement un nombre limité de posts initialement pour un affichage plus rapide
-                DispatchQueue.main.async {
-                    // Limiter à 5 posts initialement pour une performance maximale
-                    visiblePosts = Array(appData.posts.prefix(5))
-                    
-                    // Charger le reste des posts après un court délai
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        visiblePosts = appData.posts
-                        isFirstAppearance = false
-                    }
-                }
-            } else {
-                visiblePosts = appData.posts
-            }
-        }
     }
 }
 
@@ -57,59 +38,49 @@ struct PostView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             if let url = URL(string: post.imageUrl) {
-                ZStack {
-                    KFImage(url)
-                        .placeholder {
-                            ProgressView()
-                                .frame(height: 200)
-                        }
-                        .cancelOnDisappear(true)
-                        .resizable()
-                        .scaledToFit()
-                        .offset(offset)
-                        .scaleEffect(scale)
-                        .animation(.spring(), value: scale)
-                        .animation(.interactiveSpring(), value: offset)
-                        .contextMenu {
-                            if appData.currentUser?.id == post.authorId {
-                                Button(role: .destructive) {
-                                    appData.deletePost(post)
-                                } label: {
-                                    Label("Supprimer", systemImage: "trash")
-                                }
+                KFImage(url)
+                    .placeholder { 
+                        ProgressView()
+                            .frame(maxWidth: .infinity)
+                            .background(Color.gray.opacity(0.1))
+                    }
+                    .cancelOnDisappear(true)
+                    .resizable()
+                    .scaledToFit()
+                    .contextMenu {
+                        if appData.currentUser?.id == post.authorId {
+                            Button(role: .destructive) {
+                                appData.deletePost(post)
+                            } label: {
+                                Label("Supprimer", systemImage: "trash")
                             }
                         }
-                        .onAppear {
-                            // Décaler le calcul des couleurs pour améliorer la performance initiale
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                shouldCalculateColor = true
-                            }
+                    }
+                    .onAppear {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            shouldCalculateColor = true
                         }
-                        .onChange(of: shouldCalculateColor) { calculate in
-                            if calculate {
-                                KingfisherManager.shared.retrieveImage(with: url) { result in
-                                    switch result {
-                                    case .success(let imageResult):
-                                        let uiImage = imageResult.image
-                                        // Exécuter le calcul coûteux en arrière-plan
-                                        DispatchQueue.global(qos: .userInitiated).async {
-                                            let color = extractAndAdjustColor(from: uiImage)
-                                            DispatchQueue.main.async {
-                                                textColor = Color(uiColor: color)
-                                            }
+                    }
+                    .onChange(of: shouldCalculateColor) { calculate in
+                        if calculate {
+                            KingfisherManager.shared.retrieveImage(with: url) { result in
+                                switch result {
+                                case .success(let imageResult):
+                                    let uiImage = imageResult.image
+                                    DispatchQueue.global(qos: .userInitiated).async {
+                                        let color = extractAndAdjustColor(from: uiImage)
+                                        DispatchQueue.main.async {
+                                            textColor = Color(uiColor: color)
                                         }
-                                    case .failure:
-                                        textColor = .primary
                                     }
+                                case .failure:
+                                    textColor = .primary
                                 }
                             }
                         }
-                }
-                .frame(maxWidth: UIScreen.main.bounds.width)
-                .clipped()
-                .allowsHitTesting(!isZooming || scale > 1.0)
+                    }
             } else {
-                Color.clear
+                Color.gray.opacity(0.1)
                     .frame(height: 200)
             }
             

@@ -141,8 +141,8 @@ class ChessGame: ObservableObject {
         if let capturedPiece = getPiece(at: position) {
             if capturedPiece.color != piece.color {
                 print("⚔️ Capture de \(capturedPiece.type) (\(capturedPiece.color)) à la position (\(position.x), \(position.y))")
-                capturedPieces.append(capturedPiece)
-                pieces.removeAll { $0.id == capturedPiece.id }
+            capturedPieces.append(capturedPiece)
+            pieces.removeAll { $0.id == capturedPiece.id }
                 print("📊 Pièces restantes: \(pieces.count), Pièces capturées: \(capturedPieces.count)")
             } else {
                 print("❌ Erreur: Tentative de capture d'une pièce alliée")
@@ -346,40 +346,40 @@ struct ChessView: View {
                 Spacer().frame(height: geometry.size.height * 0.15)
                 
                 // Échiquier et pièces en un seul bloc
-                ZStack {
+            ZStack {
                     // Base de l'échiquier
                     chessBoard(size: min(geometry.size.width, geometry.size.height * 0.7))
-                        .onAppear {
+                    .onAppear {
                             boardSize = min(geometry.size.width, geometry.size.height * 0.7)
-                        }
-                    
-                    // Surbrillance des cases possibles
-                    ForEach(game.possibleMoves, id: \.self) { position in
-                        Rectangle()
-                            .fill(Color.yellow.opacity(0.4))
-                            .frame(width: boardSize / 8, height: boardSize / 8)
-                            .position(
-                                x: CGFloat(position.x) * boardSize / 8 + boardSize / 16,
-                                y: CGFloat(position.y) * boardSize / 8 + boardSize / 16
-                            )
                     }
-                    
-                    // Pièces d'échecs
-                    ForEach(game.pieces) { piece in
+                
+                // Surbrillance des cases possibles
+                ForEach(game.possibleMoves, id: \.self) { position in
+                    Rectangle()
+                        .fill(Color.yellow.opacity(0.4))
+                        .frame(width: boardSize / 8, height: boardSize / 8)
+                        .position(
+                            x: CGFloat(position.x) * boardSize / 8 + boardSize / 16,
+                            y: CGFloat(position.y) * boardSize / 8 + boardSize / 16
+                        )
+                }
+                
+                // Pièces d'échecs
+                ForEach(game.pieces) { piece in
                         ChessPieceView(piece: piece, size: boardSize / 8, game: game)
-                            .position(
-                                x: CGFloat(piece.position.x) * boardSize / 8 + boardSize / 16,
-                                y: CGFloat(piece.position.y) * boardSize / 8 + boardSize / 16
-                            )
+                        .position(
+                            x: CGFloat(piece.position.x) * boardSize / 8 + boardSize / 16,
+                            y: CGFloat(piece.position.y) * boardSize / 8 + boardSize / 16
+                        )
                     }
                 }
                 .frame(width: boardSize, height: boardSize)
                 .contentShape(Rectangle())
-                .gesture(
-                    DragGesture(minimumDistance: 0)
-                        .onEnded { value in
-                            guard game.selectedPiece != nil else { return }
-                            
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onEnded { value in
+                        guard game.selectedPiece != nil else { return }
+                        
                             // Convertir les coordonnées du tap en position sur l'échiquier
                             let squareSize = boardSize / 8
                             let boardX = Int(value.location.x / squareSize)
@@ -425,18 +425,18 @@ struct ChessView: View {
     
     // Fonction pour dessiner l'échiquier
     func chessBoard(size: CGFloat) -> some View {
-        VStack(spacing: 0) {
-            ForEach(0..<8) { row in
-                HStack(spacing: 0) {
-                    ForEach(0..<8) { col in
+            VStack(spacing: 0) {
+                ForEach(0..<8) { row in
+                    HStack(spacing: 0) {
+                        ForEach(0..<8) { col in
                         let isRedCell = (row + col) % 2 == 1
                         let position = Position(x: col, y: row)
                         
-                        Rectangle()
+                            Rectangle()
                             .fill(isRedCell ? Color(red: 0.8, green: 0.12, blue: 0.15) : Color(white: 0.12))
-                            .frame(width: size / 8, height: size / 8)
+                                .frame(width: size / 8, height: size / 8)
                             .contentShape(Rectangle())
-                            .onTapGesture {
+                                .onTapGesture {
                                 print("🔍 Tap sur case individuelle: (\(col), \(row)) [position exacte]")
                                 
                                 // Vérifier si une pièce est sélectionnée
