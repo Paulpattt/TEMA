@@ -56,7 +56,7 @@
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
             uuid = "AE36773C-1BFB-4F85-87F7-D2CBCEC453A1"
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "TEMA/AppData.swift"
@@ -114,6 +114,112 @@
             endingLineNumber = "10"
             landmarkName = "EditProfileNameView"
             landmarkType = "14">
+            <Locations>
+               <Location
+                  uuid = "16253920-06F1-41D3-94F5-B1C40BA71F09 - 632e1e6382e9d21d"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "TEMA.EditProfileNameView.init() -&gt; TEMA.EditProfileNameView"
+                  moduleName = "TEMA.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/paulpaturel/Desktop/TEMA/TEMA/EditProfileNameView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "12"
+                  endingLineNumber = "12">
+               </Location>
+               <Location
+                  uuid = "16253920-06F1-41D3-94F5-B1C40BA71F09 - 48c8a1c7ba13f6f7"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "TEMA.EditProfileNameView.init(appData: SwiftUI.EnvironmentObject&lt;TEMA.AppData&gt;, dismiss: SwiftUI.Environment&lt;SwiftUI.DismissAction&gt;) -&gt; TEMA.EditProfileNameView"
+                  moduleName = "TEMA.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/paulpaturel/Desktop/TEMA/TEMA/EditProfileNameView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "13"
+                  endingLineNumber = "13">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "1F649544-B288-48B3-BFA8-BED3A4459BD2"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "TEMA/HomeView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "6"
+            endingLineNumber = "6"
+            landmarkName = "HomeView"
+            landmarkType = "14">
+            <Locations>
+               <Location
+                  uuid = "1F649544-B288-48B3-BFA8-BED3A4459BD2 - ac110d8545d64dea"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "TEMA.HomeView.appData.getter : TEMA.AppData"
+                  moduleName = "TEMA.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/paulpaturel/Desktop/TEMA/TEMA/HomeView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "0"
+                  endingLineNumber = "0">
+               </Location>
+               <Location
+                  uuid = "1F649544-B288-48B3-BFA8-BED3A4459BD2 - 78a62da5994e171c"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "TEMA.HomeView.$appData.getter : SwiftUI.EnvironmentObject&lt;TEMA.AppData&gt;.Wrapper"
+                  moduleName = "TEMA.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/paulpaturel/Desktop/TEMA/TEMA/HomeView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "0"
+                  endingLineNumber = "0">
+               </Location>
+               <Location
+                  uuid = "1F649544-B288-48B3-BFA8-BED3A4459BD2 - 768fe802f89f1a20"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "default argument 0 of TEMA.HomeView.init(appData: SwiftUI.EnvironmentObject&lt;TEMA.AppData&gt;, hideHeader: SwiftUI.Binding&lt;Swift.Bool&gt;) -&gt; TEMA.HomeView"
+                  moduleName = "TEMA.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/paulpaturel/Desktop/TEMA/TEMA/HomeView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "0"
+                  endingLineNumber = "0">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "0F04CB2D-3616-417C-9F1E-5BB3E2AF6F7E"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "TEMA/AppData.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "114"
+            endingLineNumber = "114"
+            landmarkName = "init()"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

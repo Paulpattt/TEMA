@@ -50,6 +50,27 @@ struct SettingsView: View {
                 }
                 .padding(.horizontal)
                 
+                // Bouton pour accéder au tutoriel Instagram
+                NavigationLink(destination: InstagramDataTutorialView()) {
+                    HStack {
+                        Image(systemName: "square.and.arrow.down")
+                            .foregroundColor(.purple)
+
+                        Text("Comment télécharger mes données Instagram")
+                            .foregroundColor(.primary)
+
+                        Spacer()
+
+                        Image(systemName: "chevron.right")
+                            .foregroundColor(.gray)
+                            .font(.caption)
+                    }
+                    .padding()
+                    .background(Color(UIColor.secondarySystemBackground))
+                    .cornerRadius(10)
+                }
+                .padding(.horizontal)
+                
                 // Nouveau bouton pour Apple Wallet - Prépare le pass et ouvre la sheet
                 Button(action: {
                     prepareAndShowPass()
@@ -313,5 +334,40 @@ struct SettingsView_Previews: PreviewProvider {
         NavigationView {
             SettingsView().environmentObject(AppData())
         }
+    }
+}
+
+struct InstagramDataTutorialView: View {
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                Group {
+                    Text("🔐 Étape 1 — Connectez-vous à Instagram")
+                        .font(.headline)
+                    Text("1. Allez sur https://www.instagram.com\n2. Connectez-vous à votre compte.")
+
+                    Text("⚙️ Étape 2 — Accédez aux paramètres")
+                        .font(.headline)
+                    Text("1. Cliquez sur votre photo de profil en haut à droite.\n2. Cliquez sur Paramètres > Votre activité > Télécharger vos informations\n(ou accédez directement à https://www.instagram.com/download/request/)")
+
+                    Text("📧 Étape 3 — Demandez vos données")
+                        .font(.headline)
+                    Text("1. Entrez l’adresse e-mail à laquelle vous souhaitez recevoir le lien de téléchargement.\n2. Choisissez le format :\n   • HTML (lisible facilement dans un navigateur)\n   • JSON (plus adapté pour les développeurs ou pour une intégration dans d’autres outils)\n3. Cliquez sur Suivant, entrez votre mot de passe, puis Demander un téléchargement.")
+                }
+
+                Group {
+                    Text("🕐 Étape 4 — Attendez l’e-mail")
+                        .font(.headline)
+                    Text("Instagram vous enverra un lien de téléchargement par e-mail (cela peut prendre quelques minutes à quelques heures).")
+
+                    Text("📂 Étape 5 — Téléchargez le fichier ZIP")
+                        .font(.headline)
+                    Text("1. Une fois l’e-mail reçu, cliquez sur Télécharger les informations.\n2. Vous serez redirigé vers Instagram, connectez-vous de nouveau si nécessaire.\n3. Le fichier ZIP contiendra :\n   • Vos publications\n   • Vos messages\n   • Vos commentaires\n   • Vos likes\n   • Vos stories archivées\n   • Et plus encore…")
+                }
+            }
+            .padding()
+        }
+        .navigationTitle("Télécharger mes données")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }

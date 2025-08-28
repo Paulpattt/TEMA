@@ -34,13 +34,20 @@ struct ProfileView: View {
                     Button(action: {
                         showEditProfilePicture = true
                     }) {
-                        // Utiliser AvatarView au lieu de KFImage
-                        AvatarView(
-                            profileUrl: appData.currentUser?.profilePicture,
-                            size: 90,
-                            defaultSymbol: "person.fill",
-                            defaultColor: .gray
-                        )
+                        if let urlString = appData.currentUser?.profilePicture,
+                           let url = URL(string: urlString) {
+                            KFImage(url)
+                                .cacheOriginalImage()
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 90, height: 90)
+                        } else {
+                            Image(systemName: "person.fill")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 90, height: 90)
+                                .foregroundColor(.gray)
+                        }
                     }
                     .contentShape(Rectangle())
                     .offset(x: -4, y: -2) // Ajusté pour que l'avatar ne soit pas caché par le header principal

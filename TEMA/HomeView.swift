@@ -28,18 +28,12 @@ struct PostView: View {
     @State private var shouldCalculateColor = false
     @Environment(\.colorScheme) var colorScheme
     
-    // États pour le zoom et la position
-    @State private var scale: CGFloat = 1.0
-    @State private var lastScale: CGFloat = 1.0
-    @State private var offset: CGSize = .zero
-    @State private var lastOffset: CGSize = .zero
-    @State private var isZooming: Bool = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             if let url = URL(string: post.imageUrl) {
                 KFImage(url)
-                    .placeholder { 
+                    .placeholder {
                         ProgressView()
                             .frame(maxWidth: .infinity)
                             .background(Color.gray.opacity(0.1))
